@@ -1,36 +1,19 @@
-# Projeto de IP
+# Notas importantes
 
-Projeto de Introdução à Programação - CIn, UFPE.  
-De maneira geral, o projeto é um jogo que envolve conexão e pessoas em computadores diferentes jogando ao mesmo tempo.  
-Para isso, vai ser usada a arquitetura cliente-servidor, e a ferramenta utilizada na conexão é socket.
-Neste git será disponibilizada uma biblioteca desenvolvida pela equipe de monitores, para facilitar o uso de socket.  
+### Todo cuidado é pouco quando for dar push aqui,crie um branch pra voce em local,e quando voce for dar push,use de origin pro nome do branch,ele criara(ou acessara,caso ja exista) no github
 
-## O que é?
+### Nao altere nada no makefile,já esta tudo setado
 
-Como dito anteriormente, o projeto vai se basear na arquitetura cliente-servidor então nada mais normal que a biblioteca separe bem as funções do cliente e as do servidor. Ela conta com um header para os clientes (client.h) e para o servidor (server.h).
+## Como funciona
 
-## Documentação
-A documentação das duas bibliotecas podem ser encotradas em:
+Aqui,a pasta lib conterá server.c,client.c,server.h e client.h,alem de default.h,elas atuam em conjunto gracas a estrutura do makefile,portanto,deixe elas em seu lugar,nada nelas sera alterado
 
-- [server.h](./server-doc.md)
-- [client.h](./client-doc.md)
+## O que você deve alterar
 
+Basicamente,a pasta bumberman,jogando em client o client.c que vc escrevera,server o server.c q vc escreverá,e common,as .h que vc criará q serão usadas por ambos(lembrando da nota 1)
 
-## Compilando e rodando:
+## Dica
 
-No arquivo do [makefile](./makefile) as variáves _serverName_ e _clientName_ devem ser substituidas para o nome do arquivo do código do servidor e cliente que deseja compilar e/ou executar.  
-#### Compilando e rodando o server:
-	$ make server
-#### Compiando e rodando o client:
-	$ make client
-#### Compilando client e server:
-	$ make
+Voce pode sempre acessar o histórico de commits feito,para voce poder recuperar versoes antigas e funcionais de master.
 
-
-## Exemplos:
-Idealmente alguns exemplos de uso da biblioteca serão colocados na pasta de exemplos.
-* [Simple Chat](./examples/simpleChatExplanation.md)
-
-
-## Agradecimentos:
-Esta é uma modificação de 2016.2, onde [Lucas Santana](https://github.com/luucasv/), [Mateus Valgueiro](https://github.com/Valgueiro), [Vitor Castelo Branco](https://github.com/vtcb) e [Erik Zambom](https://github.com/Zambom) foram contribuidores.
+Se é seu primeito git clone,voce tera duas branchs,a job e a master,ambas iguais,crie uma pra voce,faca as devidas alteracoes,e use git push origin nome_da_branch
