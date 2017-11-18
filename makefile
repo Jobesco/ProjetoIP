@@ -1,12 +1,7 @@
-#UNCOMMENT THESE TO COMPILE SIMPLE CHAT
-CLIENTDIR := examples/simpleChat/client
-SERVERDIR := examples/simpleChat/server
-COMMONDIR := examples/simpleChat/common
-
-#UNCOMMENT THESE TO COMPILE GRAPHIC CHAT
-#CLIENTDIR := examples/graphicChat/client
-#SERVERDIR := examples/graphicChat/server
-#COMMONDIR := examples/graphicChat/common
+#UNCOMMENT THESE TO COMPILE BUMBERMAN
+CLIENTDIR := bumberman/client
+SERVERDIR := bumberman/server
+COMMONDIR := bumberman/common
 
 CC := gcc -std=c99
 RM := rm -f
