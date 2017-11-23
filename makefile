@@ -8,7 +8,7 @@ RM := rm -f
 MK := mkdir -p
 #Uncomment above for intense debugging
 #CFLAGS := -Wall -Werror -Wconversion -Wextra
-LDLIB := -lm -lallegro -lallegro_image -lallegro_primitives -lallegro_font -lallegro_ttf
+#LDLIB := -lm -lallegro -lallegro_image -lallegro_primitives -lallegro_font -lallegro_ttf
 
 OUTPUTDIR := bin
 LIBDIR := lib
