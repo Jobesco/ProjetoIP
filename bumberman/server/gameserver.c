@@ -60,7 +60,9 @@ void main(){
 
 	serverInit(max_clients); // inicia_server
     int aux = 0;
+    printf("server is running...\n");
   	estabelecer_conexao();
+  	printf("conexoes estabelecidas\n");
     iniciar_jogo(basica);
     int i; //contador padrao
   
@@ -69,28 +71,25 @@ void main(){
     if(aux==0){
     	aux++;
 		for(i=0;i<4;i++){
-		recebe_do_cliente[i].pos_x = jogadores[i].pos_x;
-		recebe_do_cliente[i].pos_y = jogadores[i].pos_y;
+		recebe_do_cliente[i].pos_x = basica.jogadores[i].pos_x;
+		recebe_do_cliente[i].pos_y = basica.jogadores[i].pos_y;
 		  
 		sendMsgToClient(&recebe_do_cliente[i],sizeof(msg_do_cliente),id[i]);  
 		}
+	broadcast(&basica,sizeof(msg_todos));
 	}
       
-      broadcast(&basica,sizeof(msg_todos)); // manda a mensagem p geral!
-      
-      
-      recebe_cliente[0] =  recvMsgFromClient(&recebe_do_cliente[0] , basica.jogadores[0].id , DONT_WAIT);
-      recebe_cliente[1] =  recvMsgFromClient(&recebe_do_cliente[1] , basica.jogadores[1].id , DONT_WAIT);
-      recebe_cliente[2] =  recvMsgFromClient(&recebe_do_cliente[2] , basica.jogadores[2].id , DONT_WAIT);
-      recebe_cliente[3] =  recvMsgFromClient(&recebe_do_cliente[3] , basica.jogadores[3].id , DONT_WAIT);
+      for(i=0;i<4;i++){
+      recvMsgFromClient(&recebe_do_cliente[i],basica.jogadores[i].id,DONT_WAIT);
+      }
       
       for(i=0;i<4;i++){
         if(recebe_cliente[i].status == MESSAGE_OK){ //ele vai receber,por hora,a intencao de movimento.
-          if(matriz[recebe_do_cliente[i].pos_x][recebe_do_cliente[i].pos_y] == 1 || matriz[recebe_do_cliente[i].pos_x][recebe_do_cliente[i].pos_y] == 2){ //caso a casa correspondente na matriz da intencao de movimento do personagem seja 1 ou 2(casas caminhaveis)
-
               basica.jogadores[i].pos_x = recebe_do_cliente[i].pos_x; //altera a posicao dele em broadcast(como ele printa a matriz e depois o jogador de acordo com a localizacao,eu nao preciso alterar nada na matriz,pq nada eh alterado nela)
               basica.jogadores[i].pos_y = recebe_do_cliente[i].pos_y;
-          }
+              
+              broadcast(&basica,sizeof(msg_todos));
+          
         }
         
         if(recebe_cliente[i].status == DISCONNECT_MSG){
@@ -109,10 +108,12 @@ void main(){
 int estabelecer_conexao(){
     
     int n_conexoes = 0;
-    int id_temp = acceptConnection();
+    int id_temp;
   
     
     while(n_conexoes < max_clients){
+        
+        id_temp = acceptConnection();
         
         if(n_conexoes < max_clients && id_temp != NO_CONNECTION ){ // if redundante p evitar resto do while
             

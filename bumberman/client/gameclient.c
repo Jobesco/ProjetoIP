@@ -26,12 +26,6 @@ char matriz[tamanho_altura][tamanho_largura] = {
     
 };
 
-typedef struct minhapos{
-	char pos_x;
-	char pos_y;
-	
-} minhapos;
-
 typedef struct{
   
   char id;
@@ -51,7 +45,8 @@ typedef struct p_broadcast{
   
 } msg_todos;
 
-msg_do_cliente jogador;
+msg_do_cliente minhapos;
+msg_todos basica;
 
 void tratar_intencao(char controle);
 
@@ -66,7 +61,6 @@ void main(){
 	}
 	
 	int estado;
-	msg_todos p1;
 	int desconectado = 0;
 	int aux = 0;
 	char controle;
@@ -78,7 +72,7 @@ void main(){
 	
 	scanf(" %s",IP);
 	
-	printf("Iremos logar com o IP %s", IP);
+	printf("Iremos logar com o IP %s\n", IP);
 	estado = connectToServer(IP);
 	
 	break;
@@ -90,13 +84,18 @@ void main(){
         if(estado == SERVER_UP){ //conexao estabelecida // prosseguir
             if(aux==0){
             	aux++;
-            	recvMsgFromServer(&
+            	recvMsgFromServer(&minhapos,WAIT_FOR_IT);
             }
-            recvMsgFromServer(&p1, WAIT_FOR_IT);
+            
+            recvMsgFromServer(&basica,DONT_WAIT);
             
             controle = getch();
             tratar_intencao(controle);
-            retorno = enviar_mensagem(jogador,controle); // manda a msg
+            
+            if(matriz[minhapos.pos_x][minhapos.pos_y] == 1 || matriz[minhapos.pos_x][minhapos.pos_y] == 2){
+            
+            retorno = sendMsgToServer(&minhapos,sizeof(msg_do_cliente)); // manda a intencao
+            }
             
             if(retorno == SERVER_DISCONNECTED){
             	desconectado = 1;
@@ -133,10 +132,17 @@ void tratar_intencao(char controle){
 	
 	switch(controle){
 		case 'W':
-			jogador.pos_x = controle;
+			minhapos.pos_x -= 1;
 			break;
 		case 'A':
-			jogador.pos_y = controle
+			minhapos.pos_y -= 1;
+			break;
+		case 'S':
+			minhapos.pos_x += 1;
+			break;
+		case 'D':
+			minhapos.pos_y += 1;
+			break;
 	
 	}
 }
