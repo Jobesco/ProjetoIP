@@ -13,8 +13,8 @@ MK := mkdir -p
 OUTPUTDIR := bin
 LIBDIR := lib
 
-CLIENTNAME := client
-SERVERNAME := server
+CLIENTNAME := gameclient
+SERVERNAME := gameserver
 
 EXT := c
 INC := -I lib -I $(COMMONDIR)
