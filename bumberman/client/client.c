@@ -1,18 +1,5 @@
-//
-//  client_.c
-//  ProjectIP_def
-//
-//  Created by Samuel Souza on 18/11/2017.
-//  Copyright © 2017 Samuel Souza. All rights reserved.
-//
-
-#include <stdio.h>
-#include <stdlib.h>
-#include "client_.h"
+#include "default.h"
 #include "client.h"
-#include <allegro5/allegro5.h>
-//#include <allegro5.h>
-#define IP "192.168.1.1"
 #define max_clients 4
 #define tamanho_altura 8
 #define tamanho_largura 12
@@ -21,9 +8,8 @@
 #define verd_2 2
 #define marrom 3
 #define quebra 4
-#define player 5;
 
-int matriz[tamanho_altura][tamanho_largura] = {
+char matriz[tamanho_altura][tamanho_largura] = {
     
     {pedra,pedra,pedra,pedra,pedra,pedra,pedra,pedra,pedra,pedra,pedra,pedra},
     {pedra,verd_1,marrom,quebra,verd_2,verd_1,quebra,quebra,quebra,verd_1,verd_2,pedra},
@@ -35,8 +21,6 @@ int matriz[tamanho_altura][tamanho_largura] = {
     {pedra,pedra,pedra,pedra,pedra,pedra,pedra,pedra,pedra,pedra,pedra,pedra}
     
 };
-
-char posicao[2] = {""};
 
 typedef struct{
     
@@ -114,17 +98,31 @@ void muda_posicao(jogador p1, char posix[]){
     
 }
 
-int main(){
+void main(){
+
+	char IP[50];
+	int estado;
+	jogador player;
+	int desconectado = 0;
+	
+	char controle = getch_();
+    int retorno = 0;
+    int bytes_lidos = 0;
+	
+	while(1){
+	
+	printf("Digite o IP onde deseja se conectar");]
+	
+	scanf(" %s",IP);
+	
+	estado = connectToServer(&IP);
+	
+	break;
+	}
+	
+	while(desconectado != 1){ // verifica se o client ainda joga
     
-    int estado = connectToServer(IP);//conecta ao ip
-    jogador p1;
-    int desconectado = 0;
-    
-    while(desconectado != 1){ // verifica se o client ainda joga
-    
-        char controle = getch_();
-        int retorno = 0;
-        int bytes_lidos = 0;
+        controle = getch_();
         
         if(estado == SERVER_UP){ //conexao estabelecida // prosseguir
             
@@ -135,6 +133,8 @@ int main(){
                 bytes_lidos = recvMsgFromServer(&p1, WAIT_FOR_IT); // aguarda a confirmacao do server
                 muda_posicao(p1, posicao); // após constatado a validade da jogada, a posix muda
                 
+            } else if(retorno == SERVER_DISCONNECTED){
+            	desconectado = 1;
             }
         
         }else if(estado == SERVER_DOWN){ //nao achou o server
@@ -155,5 +155,9 @@ int main(){
             
         }
     }
-    return 0;
+	
+	
+	
+	
+
 }
