@@ -1,6 +1,6 @@
 #include "server.h"
 #include "default.h"
-
+#include "comum.h"
 #define max_clients 4
 #define tamanho_altura 8
 #define tamanho_largura 12
@@ -12,30 +12,35 @@
 
 char id[4];
 
-char matriz[tamanho_altura][tamanho_largura] = { //ele pode acessar 6x10
+char matriz[tamanho_altura][tamanho_largura] = {
     
-        {pedra,pedra,pedra,pedra,pedra,pedra,pedra,pedra,pedra,pedra,pedra,pedra},
-        {pedra,verd_1,marrom,quebra,verd_2,verd_1,quebra,quebra,quebra,verd_1,verd_2,pedra},
-        {pedra,verd_2,verd_1,quebra,marrom,verd_2,quebra,verd_2,quebra,quebra,verd_1,pedra},
-        {pedra,quebra,quebra,marrom,verd_2,marrom,quebra,verd_1,marrom,quebra,quebra,pedra},
-        {pedra,quebra,quebra,verd_2,verd_1,verd_2,quebra,quebra,verd_1,marrom,quebra,pedra},
-        {pedra,verd_1,verd_2,quebra,quebra,marrom,marrom,verd_1,quebra,verd_1,quebra,pedra},
-        {pedra,verd_1,quebra,quebra,quebra,quebra,quebra,quebra,quebra,verd_2,verd_1,pedra},
-        {pedra,pedra,pedra,pedra,pedra,pedra,pedra,pedra,pedra,pedra,pedra,pedra}
-                                               
+    {pedra,pedra,pedra,pedra,pedra,pedra,pedra,pedra,pedra,pedra,pedra,pedra},
+    {pedra,verd_1,verd_1,verd_1,verd_2,verd_1,verd_1,verd_1,verd_1,verd_1,verd_2,pedra},
+    {pedra,verd_2,verd_1,verd_1,verd_1,verd_2,verd_1,verd_2,verd_1,verd_1,verd_1,pedra},
+    {pedra,verd_1,verd_1,verd_1,verd_2,verd_1,verd_1,verd_1,verd_1,verd_1,verd_1,pedra},
+    {pedra,verd_1,verd_1,verd_2,verd_1,verd_2,verd_1,verd_1,verd_1,verd_1,verd_1,pedra},
+    {pedra,verd_1,verd_2,verd_1,verd_1,verd_1,verd_1,verd_1,verd_1,verd_1,verd_1,pedra},
+    {pedra,verd_1,verd_1,verd_1,verd_1,verd_1,verd_1,verd_1,verd_1,verd_2,verd_1,pedra},
+    {pedra,pedra,pedra,pedra,pedra,pedra,pedra,pedra,pedra,pedra,pedra,pedra}
+    
 };
 
 typedef struct mensagem_cliente{
 	char pos_x;
   	char pos_y;
+  	char bomba; //0 -- nao tentei jogar bomba // 1 -- tentei jogar bomba
+
+
 } msg_do_cliente;
 
 typedef struct{
-  
   char id;
   char pos_x;
   char pos_y;
-  
+  char bomba;
+  char posbomba_x;
+  char posbomba_y;
+
 } jogador;
 
 typedef struct p_broadcast{
@@ -44,17 +49,12 @@ typedef struct p_broadcast{
   
 } msg_todos;
 
-void iniciar_jogo(msg_todos basica);
-
-
-
-int estabelecer_conexao();
-
 msg_todos basica; //essa eh a mensagem basica para todos a ser enviada. 
-
 struct msg_ret_t recebe_cliente[4];
-
 msg_do_cliente recebe_do_cliente[4];
+
+void iniciar_jogo();
+int estabelecer_conexao();
 
 void main(){
 
@@ -63,11 +63,27 @@ void main(){
     printf("server is running...\n");
   	estabelecer_conexao();
   	printf("conexoes estabelecidas\n");
+<<<<<<< HEAD:bumberman/server/gameserver.c
+    iniciar_jogo();
+=======
     iniciar_jogo(basica);
+>>>>>>> 83eb56206fd435ba227aaa180f6163dc2d7f882f:bumberman/server/gameserver.c
     int i; //contador padrao
   
     while(1){ //loop referente ao jogo
       
+<<<<<<< HEAD:bumberman/server/gameserver.c
+	    if(aux==0){
+			aux++;
+			for(i=0;i<4;i++){
+			recebe_do_cliente[i].pos_x = basica.jogadores[i].pos_x;
+			recebe_do_cliente[i].pos_y = basica.jogadores[i].pos_y;
+			printf("passando a posicao %d - %d para jogador %d\n",basica.jogadores[i].pos_x,basica.jogadores[i].pos_y,id[i]);
+			sendMsgToClient(&recebe_do_cliente[i],sizeof(msg_do_cliente),id[i]);  
+			}
+		broadcast(&basica,sizeof(msg_todos));
+		}
+=======
     if(aux==0){
     	aux++;
 		for(i=0;i<4;i++){
@@ -78,18 +94,34 @@ void main(){
 		}
 	broadcast(&basica,sizeof(msg_todos));
 	}
+>>>>>>> 83eb56206fd435ba227aaa180f6163dc2d7f882f:bumberman/server/gameserver.c
       
       for(i=0;i<4;i++){
       recvMsgFromClient(&recebe_do_cliente[i],basica.jogadores[i].id,DONT_WAIT);
       }
       
       for(i=0;i<4;i++){
+<<<<<<< HEAD:bumberman/server/gameserver.c
+        if(recebe_cliente[i].status == MESSAGE_OK){ 
+        	if(recebe_do_cliente[i].bomba == 1){
+        		basica.jogadores[i].bomba = 1;
+        		basica.jogadores[i].posbomba_x = basica.jogadores[i].pos_x;
+        		basica.jogadores[i].posbomba_y = basica.jogadores[i].pos_y;
+
+        		broadcast(&basica,sizeof(msg_todos));
+        	}else{
+=======
         if(recebe_cliente[i].status == MESSAGE_OK){ //ele vai receber,por hora,a intencao de movimento.
+>>>>>>> 83eb56206fd435ba227aaa180f6163dc2d7f882f:bumberman/server/gameserver.c
               basica.jogadores[i].pos_x = recebe_do_cliente[i].pos_x; //altera a posicao dele em broadcast(como ele printa a matriz e depois o jogador de acordo com a localizacao,eu nao preciso alterar nada na matriz,pq nada eh alterado nela)
               basica.jogadores[i].pos_y = recebe_do_cliente[i].pos_y;
               
               broadcast(&basica,sizeof(msg_todos));
+<<<<<<< HEAD:bumberman/server/gameserver.c
+          	}
+=======
           
+>>>>>>> 83eb56206fd435ba227aaa180f6163dc2d7f882f:bumberman/server/gameserver.c
         }
         
         if(recebe_cliente[i].status == DISCONNECT_MSG){
@@ -115,7 +147,11 @@ int estabelecer_conexao(){
         
         id_temp = acceptConnection();
         
+<<<<<<< HEAD:bumberman/server/gameserver.c
+        if(id_temp != NO_CONNECTION){
+=======
         if(n_conexoes < max_clients && id_temp != NO_CONNECTION ){ // if redundante p evitar resto do while
+>>>>>>> 83eb56206fd435ba227aaa180f6163dc2d7f882f:bumberman/server/gameserver.c
             
                 id[n_conexoes] = id_temp;
                 n_conexoes++;
@@ -130,7 +166,7 @@ int estabelecer_conexao(){
     return 1;   
 }
 
-void iniciar_jogo(msg_todos basica){
+void iniciar_jogo(){
   
     basica.jogadores[0].id = 0;
     basica.jogadores[0].pos_x = 1; //linha
