@@ -1,9 +1,6 @@
 #include "client.h"
 #include "default.h"
-<<<<<<< HEAD
 #include "comum.h"
-=======
->>>>>>> 83eb56206fd435ba227aaa180f6163dc2d7f882f
 #define max_clients 4
 #define tamanho_altura 8
 #define tamanho_largura 12
@@ -20,21 +17,21 @@ char posicao[2] = {""};
 char matriz[tamanho_altura][tamanho_largura] = {
     
     {pedra,pedra,pedra,pedra,pedra,pedra,pedra,pedra,pedra,pedra,pedra,pedra},
-<<<<<<< HEAD
+
     {pedra,verd_1,verd_1,verd_1,verd_2,verd_1,verd_1,verd_1,verd_1,verd_1,verd_2,pedra},
     {pedra,verd_2,verd_1,verd_1,verd_1,verd_2,verd_1,verd_2,verd_1,verd_1,verd_1,pedra},
     {pedra,verd_1,verd_1,verd_1,verd_2,verd_1,verd_1,verd_1,verd_1,verd_1,verd_1,pedra},
     {pedra,verd_1,verd_1,verd_2,verd_1,verd_2,verd_1,verd_1,verd_1,verd_1,verd_1,pedra},
     {pedra,verd_1,verd_2,verd_1,verd_1,verd_1,verd_1,verd_1,verd_1,verd_1,verd_1,pedra},
     {pedra,verd_1,verd_1,verd_1,verd_1,verd_1,verd_1,verd_1,verd_1,verd_2,verd_1,pedra},
-=======
+
     {pedra,verd_1,marrom,quebra,verd_2,verd_1,quebra,quebra,quebra,verd_1,verd_2,pedra},
     {pedra,verd_2,verd_1,quebra,marrom,verd_2,quebra,verd_2,quebra,quebra,verd_1,pedra},
     {pedra,quebra,quebra,marrom,verd_2,marrom,quebra,verd_1,marrom,quebra,quebra,pedra},
     {pedra,quebra,quebra,verd_2,verd_1,verd_2,quebra,quebra,verd_1,marrom,quebra,pedra},
     {pedra,verd_1,verd_2,quebra,quebra,marrom,marrom,verd_1,quebra,verd_1,quebra,pedra},
     {pedra,verd_1,quebra,quebra,quebra,quebra,quebra,quebra,quebra,verd_2,verd_1,pedra},
->>>>>>> 83eb56206fd435ba227aaa180f6163dc2d7f882f
+
     {pedra,pedra,pedra,pedra,pedra,pedra,pedra,pedra,pedra,pedra,pedra,pedra}
     
 };
@@ -44,23 +41,22 @@ typedef struct{
   char id;
   char pos_x;
   char pos_y;
-<<<<<<< HEAD
+
   char bomba; //se em algum momento,bomba for 1
   char posbomba_x;
   char posbomba_y;
-=======
->>>>>>> 83eb56206fd435ba227aaa180f6163dc2d7f882f
+
+
   
 } jogador;
 
 typedef struct mensagem_cliente{
 	char pos_x;
   	char pos_y;
-<<<<<<< HEAD
+
   	char bomba; //0 -- nao tentei jogar bomba // 1 -- tentei jogar bomba
 
-=======
->>>>>>> 83eb56206fd435ba227aaa180f6163dc2d7f882f
+
 } msg_do_cliente;
 
 typedef struct p_broadcast{
@@ -69,7 +65,7 @@ typedef struct p_broadcast{
   
 } msg_todos;
 
-<<<<<<< HEAD
+
 msg_do_cliente minha_intencao;
 msg_todos basica;
 
@@ -78,7 +74,7 @@ void tratar_intencao(char *controle);
 void main(){
 
 	char *IP = (char*)calloc(30,sizeof(char));
-=======
+
 msg_do_cliente minhapos;
 msg_todos basica;
 
@@ -89,7 +85,7 @@ void main(){
 	char *IP;
 	
 	IP = (char*)calloc(50,sizeof(char));
->>>>>>> 83eb56206fd435ba227aaa180f6163dc2d7f882f
+
 	if(IP==NULL){
 		printf("ERRO NA ALOCACAO\n");
 		exit(1);
@@ -100,19 +96,18 @@ void main(){
 	int aux = 0;
 	char controle;
     int retorno = 0;
-<<<<<<< HEAD
+
     int i,j,k;
     int tamanho_msg_entregue = 0;
     int verifica=0;
 
     time_t inicioConexao,atualConexao; //para garantir q ele continue conectando
-=======
->>>>>>> 83eb56206fd435ba227aaa180f6163dc2d7f882f
+
 
 	while(1){
 	
 	printf("Digite o IP onde deseja se conectar\n");
-<<<<<<< HEAD
+
 	scanf(" %s",IP);
 	printf("Iremos logar ao IP %s\n", IP);
 
@@ -125,13 +120,13 @@ void main(){
 		if(estado == SERVER_UP)
 			break;
 	}
-=======
+
 	
 	scanf(" %s",IP);
 	
 	printf("Iremos logar com o IP %s\n", IP);
 	estado = connectToServer(IP);
->>>>>>> 83eb56206fd435ba227aaa180f6163dc2d7f882f
+
 	
 	break;
 	}
@@ -142,7 +137,7 @@ void main(){
         if(estado == SERVER_UP){ //conexao estabelecida // prosseguir
             if(aux==0){
             	aux++;
-<<<<<<< HEAD
+
             	printf("Conectado!\n");
             	recvMsgFromServer(&minha_intencao,WAIT_FOR_IT);
             	printf("minha posicao eh %d - %d\n", minha_intencao.pos_x,minha_intencao.pos_y);
@@ -210,7 +205,7 @@ void main(){
             		minha_intencao.bomba = 0;
             	}
             
-=======
+
             	recvMsgFromServer(&minhapos,WAIT_FOR_IT);
             }
             
@@ -222,7 +217,7 @@ void main(){
             if(matriz[minhapos.pos_x][minhapos.pos_y] == 1 || matriz[minhapos.pos_x][minhapos.pos_y] == 2){
             
             retorno = sendMsgToServer(&minhapos,sizeof(msg_do_cliente)); // manda a intencao
->>>>>>> 83eb56206fd435ba227aaa180f6163dc2d7f882f
+
             }
             
             if(retorno == SERVER_DISCONNECTED){
@@ -231,45 +226,44 @@ void main(){
         
         }else if(estado == SERVER_DOWN){ //nao achou o server
             
-<<<<<<< HEAD
+
             printf("Servidor nao encontrado :S\n");
-=======
+
             printf("Servidor nao encontrado!\n");
->>>>>>> 83eb56206fd435ba227aaa180f6163dc2d7f882f
+
             break;
             
         }else if(estado == SERVER_FULL){ // cheio
             
-<<<<<<< HEAD
+
             printf("Servidor lotado!\nAguarde proxima partida :/\n");
-=======
+
             printf("Servidor lotado! Aguarde proxima partida\n");
->>>>>>> 83eb56206fd435ba227aaa180f6163dc2d7f882f
+
             break;
             
         }else if(estado == SERVER_CLOSED){ // n aceita conexao
             
-<<<<<<< HEAD
             printf("Servidor nao aceita novas conexoes! >:U\n");
-=======
+
             printf("Servidor nao aceita novas conexoes!\n");
->>>>>>> 83eb56206fd435ba227aaa180f6163dc2d7f882f
+
             break;
             
         }else if(estado == SERVER_TIMEOUT){ // demorou p responder
             
-<<<<<<< HEAD
+
             printf("Voce esperou demais, verifique sua conexao de dados! :P\n");
-=======
+
             printf("Voce esperou demais, verifique sua conexao de dados!\n");
->>>>>>> 83eb56206fd435ba227aaa180f6163dc2d7f882f
+
             break;
             
         }
     }
 }
 
-<<<<<<< HEAD
+
 int verifica_posix(int posix_x, int posix_y){
     
     if(matriz[posix_x][posix_y] == 1 || matriz[posix_x][posix_y] == 2){
@@ -312,7 +306,7 @@ void tratar_intencao(char *controle){
 		case 'K': //caso seja uma bomba,ela vai ter a posicao do jogador
 			minha_intencao.bomba = 1;
 			break;
-=======
+
 void tratar_intencao(char controle){
 	if(controle>96){
 		controle -= 32;
@@ -331,7 +325,5 @@ void tratar_intencao(char controle){
 		case 'D':
 			minhapos.pos_y += 1;
 			break;
-	
->>>>>>> 83eb56206fd435ba227aaa180f6163dc2d7f882f
 	}
 }

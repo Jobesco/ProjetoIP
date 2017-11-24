@@ -63,16 +63,16 @@ void main(){
     printf("server is running...\n");
   	estabelecer_conexao();
   	printf("conexoes estabelecidas\n");
-<<<<<<< HEAD:bumberman/server/gameserver.c
+
     iniciar_jogo();
-=======
+
     iniciar_jogo(basica);
->>>>>>> 83eb56206fd435ba227aaa180f6163dc2d7f882f:bumberman/server/gameserver.c
+
     int i; //contador padrao
   
     while(1){ //loop referente ao jogo
       
-<<<<<<< HEAD:bumberman/server/gameserver.c
+
 	    if(aux==0){
 			aux++;
 			for(i=0;i<4;i++){
@@ -83,7 +83,7 @@ void main(){
 			}
 		broadcast(&basica,sizeof(msg_todos));
 		}
-=======
+
     if(aux==0){
     	aux++;
 		for(i=0;i<4;i++){
@@ -94,14 +94,13 @@ void main(){
 		}
 	broadcast(&basica,sizeof(msg_todos));
 	}
->>>>>>> 83eb56206fd435ba227aaa180f6163dc2d7f882f:bumberman/server/gameserver.c
+
       
       for(i=0;i<4;i++){
       recvMsgFromClient(&recebe_do_cliente[i],basica.jogadores[i].id,DONT_WAIT);
       }
       
       for(i=0;i<4;i++){
-<<<<<<< HEAD:bumberman/server/gameserver.c
         if(recebe_cliente[i].status == MESSAGE_OK){ 
         	if(recebe_do_cliente[i].bomba == 1){
         		basica.jogadores[i].bomba = 1;
@@ -110,31 +109,19 @@ void main(){
 
         		broadcast(&basica,sizeof(msg_todos));
         	}else{
-=======
         if(recebe_cliente[i].status == MESSAGE_OK){ //ele vai receber,por hora,a intencao de movimento.
->>>>>>> 83eb56206fd435ba227aaa180f6163dc2d7f882f:bumberman/server/gameserver.c
               basica.jogadores[i].pos_x = recebe_do_cliente[i].pos_x; //altera a posicao dele em broadcast(como ele printa a matriz e depois o jogador de acordo com a localizacao,eu nao preciso alterar nada na matriz,pq nada eh alterado nela)
               basica.jogadores[i].pos_y = recebe_do_cliente[i].pos_y;
-              
+
               broadcast(&basica,sizeof(msg_todos));
-<<<<<<< HEAD:bumberman/server/gameserver.c
           	}
-=======
-          
->>>>>>> 83eb56206fd435ba227aaa180f6163dc2d7f882f:bumberman/server/gameserver.c
         }
-        
         if(recebe_cliente[i].status == DISCONNECT_MSG){
           basica.jogadores[i].pos_x = -1; //se ele estiveer na posicao -1,ele nao ira printa-lo
             basica.jogadores[i].pos_y = -1;
-        }
-           
+        }   
       }
-      
-      
-      
-    }
-      
+    }   
 }
 
 int estabelecer_conexao(){
@@ -143,26 +130,16 @@ int estabelecer_conexao(){
     int id_temp;
   
     
-    while(n_conexoes < max_clients){
-        
+    while(n_conexoes < max_clients){   
         id_temp = acceptConnection();
-        
-<<<<<<< HEAD:bumberman/server/gameserver.c
         if(id_temp != NO_CONNECTION){
-=======
-        if(n_conexoes < max_clients && id_temp != NO_CONNECTION ){ // if redundante p evitar resto do while
->>>>>>> 83eb56206fd435ba227aaa180f6163dc2d7f882f:bumberman/server/gameserver.c
-            
+        	if(n_conexoes < max_clients && id_temp != NO_CONNECTION ){ // if redundante p evitar resto do while            
                 id[n_conexoes] = id_temp;
-                n_conexoes++;
-                
+                n_conexoes++;  
             }else{
-            
-            rejectConnection();
-            
-        }
-      
-      }//conexoes estabelecidas
+            	rejectConnection();
+        	}
+      	}//conexoes estabelecidas
     return 1;   
 }
 
