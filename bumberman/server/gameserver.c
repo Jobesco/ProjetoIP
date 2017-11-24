@@ -27,25 +27,25 @@ char matriz[tamanho_altura][tamanho_largura] = {
 
 typedef struct mensagem_cliente{
 	char pos_x;
-  	char pos_y;
-  	char bomba; //0 -- nao tentei jogar bomba // 1 -- tentei jogar bomba
+	char pos_y;
+	char bomba; //0 -- nao tentei jogar bomba // 1 -- tentei jogar bomba
 
 
 } msg_do_cliente;
 
 typedef struct{
-  char id;
-  char pos_x;
-  char pos_y;
-  char bomba;
-  char posbomba_x;
-  char posbomba_y;
+	char id;
+	char pos_x;
+	char pos_y;
+	char bomba;
+	char posbomba_x;
+	char posbomba_y;
 
 } jogador;
 
 typedef struct p_broadcast{
   
-  jogador jogadores[4]; //eh 2 pq recebe as posicoes(x,y) num plano cartesiano.
+	jogador jogadores[4]; //eh 2 pq recebe as posicoes(x,y) num plano cartesiano.
   
 } msg_todos;
 
@@ -54,7 +54,7 @@ struct msg_ret_t recebe_cliente[4];
 msg_do_cliente recebe_do_cliente[4];
 
 void iniciar_jogo();
-int estabelecer_conexao();
+void estabelecer_conexao();
 
 void main(){
 
@@ -66,81 +66,71 @@ void main(){
 
     iniciar_jogo();
 
-    iniciar_jogo(basica);
-
     int i; //contador padrao
   
     while(1){ //loop referente ao jogo
-      
 
 	    if(aux==0){
 			aux++;
 			for(i=0;i<4;i++){
-			recebe_do_cliente[i].pos_x = basica.jogadores[i].pos_x;
-			recebe_do_cliente[i].pos_y = basica.jogadores[i].pos_y;
-			printf("passando a posicao %d - %d para jogador %d\n",basica.jogadores[i].pos_x,basica.jogadores[i].pos_y,id[i]);
-			sendMsgToClient(&recebe_do_cliente[i],sizeof(msg_do_cliente),id[i]);  
+				recebe_do_cliente[i].pos_x = basica.jogadores[i].pos_x;
+				recebe_do_cliente[i].pos_y = basica.jogadores[i].pos_y;
+				printf("passando a posicao %d - %d para jogador %d\n",basica.jogadores[i].pos_x,basica.jogadores[i].pos_y,id[i]);
+
+				sendMsgToClient(&recebe_do_cliente[i],sizeof(msg_do_cliente),id[i]);  
 			}
+
 		broadcast(&basica,sizeof(msg_todos));
 		}
-
-    if(aux==0){
-    	aux++;
-		for(i=0;i<4;i++){
-		recebe_do_cliente[i].pos_x = basica.jogadores[i].pos_x;
-		recebe_do_cliente[i].pos_y = basica.jogadores[i].pos_y;
-		  
-		sendMsgToClient(&recebe_do_cliente[i],sizeof(msg_do_cliente),id[i]);  
-		}
-	broadcast(&basica,sizeof(msg_todos));
-	}
-
       
-      for(i=0;i<4;i++){
-      recvMsgFromClient(&recebe_do_cliente[i],basica.jogadores[i].id,DONT_WAIT);
-      }
+    	for(i=0;i<4;i++){
+    		recvMsgFromClient(&recebe_do_cliente[i],basica.jogadores[i].id,DONT_WAIT);
+    	}
       
-      for(i=0;i<4;i++){
-        if(recebe_cliente[i].status == MESSAGE_OK){ 
-        	if(recebe_do_cliente[i].bomba == 1){
-        		basica.jogadores[i].bomba = 1;
-        		basica.jogadores[i].posbomba_x = basica.jogadores[i].pos_x;
-        		basica.jogadores[i].posbomba_y = basica.jogadores[i].pos_y;
+    	for(i=0;i<4;i++){
+        	if(recebe_cliente[i].status == MESSAGE_OK){
+        		if(recebe_do_cliente[i].bomba == 1){
+        			recebe_do_cliente[i].bomba = 0; //RESETA O VALOR DA BOMBA PARA 0
 
-        		broadcast(&basica,sizeof(msg_todos));
-        	}else{
-        if(recebe_cliente[i].status == MESSAGE_OK){ //ele vai receber,por hora,a intencao de movimento.
-              basica.jogadores[i].pos_x = recebe_do_cliente[i].pos_x; //altera a posicao dele em broadcast(como ele printa a matriz e depois o jogador de acordo com a localizacao,eu nao preciso alterar nada na matriz,pq nada eh alterado nela)
-              basica.jogadores[i].pos_y = recebe_do_cliente[i].pos_y;
+        			basica.jogadores[i].bomba = 1;
+        			basica.jogadores[i].posbomba_x = basica.jogadores[i].pos_x;
+        			basica.jogadores[i].posbomba_y = basica.jogadores[i].pos_y;
 
-              broadcast(&basica,sizeof(msg_todos));
-          	}
-        }
-        if(recebe_cliente[i].status == DISCONNECT_MSG){
-          basica.jogadores[i].pos_x = -1; //se ele estiveer na posicao -1,ele nao ira printa-lo
-            basica.jogadores[i].pos_y = -1;
-        }   
-      }
+        			broadcast(&basica,sizeof(msg_todos));
+        		}else{
+              		basica.jogadores[i].pos_x = recebe_do_cliente[i].pos_x; //altera a posicao dele em broadcast(como ele printa a matriz e depois o jogador de acordo com a localizacao,eu nao preciso alterar nada na matriz,pq nada eh alterado nela)
+              		basica.jogadores[i].pos_y = recebe_do_cliente[i].pos_y;
+
+              		recebe_do_cliente[i].pos_x = 0; //TESTE,PARA VER SE ASSIM ELE N PRINTA A MATRIZ IGUAL DOIDO
+              		recebe_do_cliente[i].pos_y = 0;
+
+              		broadcast(&basica,sizeof(msg_todos));
+          		}
+        	}
+        	if(recebe_cliente[i].status == DISCONNECT_MSG){
+        		basica.jogadores[i].pos_x = -1; //se ele estiveer na posicao -1,ele nao ira printa-lo
+        		basica.jogadores[i].pos_y = -1;
+        	} 
+    	}
     }   
 }
 
-int estabelecer_conexao(){
-    
+void estabelecer_conexao(){
     int n_conexoes = 0;
     int id_temp;
-  
-    
+
     while(n_conexoes < max_clients){   
         id_temp = acceptConnection();
+        
         if(id_temp != NO_CONNECTION){
-        	if(n_conexoes < max_clients && id_temp != NO_CONNECTION ){ // if redundante p evitar resto do while            
+        	if(n_conexoes < max_clients){ // if redundante p evitar resto do while            
                 id[n_conexoes] = id_temp;
                 n_conexoes++;  
             }else{
             	rejectConnection();
         	}
       	}//conexoes estabelecidas
-    return 1;   
+    }  
 }
 
 void iniciar_jogo(){
