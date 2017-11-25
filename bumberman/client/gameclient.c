@@ -158,9 +158,7 @@ void main(){
             
             if(controle != NO_KEY_PRESSED){ //se ele apertou uma tecla
             	if(controle != 'K'){
-	            	if(matriz[minha_intencao.pos_x][minha_intencao.pos_y] == 1 || matriz[minha_intencao.pos_x][minha_intencao.pos_y] == 2){
-	            		retorno = sendMsgToServer(&minha_intencao,sizeof(msg_do_cliente)); // manda a intencao
-	            	}
+	            	retorno = sendMsgToServer(&minha_intencao,sizeof(msg_do_cliente)); // manda a intencao
             	}else{
             		retorno = sendMsgToServer(&minha_intencao,sizeof(msg_do_cliente));
             		minha_intencao.bomba = 0;
@@ -209,25 +207,29 @@ void tratar_intencao(char *controle){
 		case 'W':
             if(verifica_posix(minha_intencao.pos_x-1, minha_intencao.pos_y) == 1){
                 minha_intencao.pos_x -= 1;
-            }
+            }else
+            	controle[0] = NO_KEY_PRESSED;
             break;
             
         case 'A':
             if(verifica_posix(minha_intencao.pos_x, minha_intencao.pos_y-1) == 1){
                 minha_intencao.pos_y -= 1;
-            }
+            }else
+            	controle[0] = NO_KEY_PRESSED;
             break;
             
         case 'S':
             if(verifica_posix(minha_intencao.pos_x+1, minha_intencao.pos_y) == 1){
                 minha_intencao.pos_x += 1;
-            }
+            }else
+            	controle[0] = NO_KEY_PRESSED;
             break;
             
         case 'D':
             if(verifica_posix(minha_intencao.pos_x, minha_intencao.pos_y+1) == 1){
                 minha_intencao.pos_y += 1;
-            }
+            }else
+            	controle[0] = NO_KEY_PRESSED;
             break;
 		case 'K': //caso seja uma bomba,ela vai ter a posicao do jogador
 			minha_intencao.bomba = 1;

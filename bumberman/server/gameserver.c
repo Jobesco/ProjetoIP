@@ -75,6 +75,7 @@ void main(){
 			for(i=0;i<4;i++){
 				recebe_do_cliente[i].pos_x = basica.jogadores[i].pos_x;
 				recebe_do_cliente[i].pos_y = basica.jogadores[i].pos_y;
+
 				printf("passando a posicao %d - %d para jogador %d\n",basica.jogadores[i].pos_x,basica.jogadores[i].pos_y,id[i]);
 
 				sendMsgToClient(&recebe_do_cliente[i],sizeof(msg_do_cliente),id[i]);  
@@ -84,11 +85,9 @@ void main(){
 		}
       
     	for(i=0;i<4;i++){
-    		recvMsgFromClient(&recebe_do_cliente[i],basica.jogadores[i].id,DONT_WAIT);
-    	}
-      
-    	for(i=0;i<4;i++){
-        	if(recebe_cliente[i].status == MESSAGE_OK){
+    		recebe_cliente[i] =  recvMsgFromClient(&recebe_do_cliente[i],basica.jogadores[i].id,DONT_WAIT);
+    		
+    		if(recebe_cliente[i].status == MESSAGE_OK){
         		if(recebe_do_cliente[i].bomba == 1){
         			recebe_do_cliente[i].bomba = 0; //RESETA O VALOR DA BOMBA PARA 0
 
@@ -100,9 +99,6 @@ void main(){
         		}else{
               		basica.jogadores[i].pos_x = recebe_do_cliente[i].pos_x; //altera a posicao dele em broadcast(como ele printa a matriz e depois o jogador de acordo com a localizacao,eu nao preciso alterar nada na matriz,pq nada eh alterado nela)
               		basica.jogadores[i].pos_y = recebe_do_cliente[i].pos_y;
-
-              		recebe_do_cliente[i].pos_x = 0; //TESTE,PARA VER SE ASSIM ELE N PRINTA A MATRIZ IGUAL DOIDO
-              		recebe_do_cliente[i].pos_y = 0;
 
               		broadcast(&basica,sizeof(msg_todos));
           		}
