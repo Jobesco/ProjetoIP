@@ -1,8 +1,8 @@
 # Notas importantes
 
-### Todo cuidado é pouco quando for dar push aqui,crie um branch pra voce em local,e quando voce for dar push,use de origin pro nome do branch,ele criara(ou acessara,caso ja exista) no github
+Todo cuidado é pouco quando for dar push aqui,crie um branch pra voce em local,e quando voce for dar push,use de origin pro nome do branch,ele criara(ou acessara,caso ja exista) no github
 
-### Nao altere nada no makefile,já esta tudo setado
+Nao altere nada no makefile,já esta tudo setado
 
 ## Como funciona
 
@@ -16,4 +16,4 @@ Basicamente,a pasta bumberman,jogando em client o client.c que vc escrevera,serv
 
 Voce pode sempre acessar o histórico de commits feito,para voce poder recuperar versoes antigas e funcionais de master.
 
-Se é seu primeito git clone,voce tera duas branchs,a job e a master,ambas iguais,crie uma pra voce,faca as devidas alteracoes,e use git push origin nome_da_branch
+Se é seu primeito git clone,voce tera duas branchs,a job e a master,ambas iguais(com a diferenca que a job esta com a biblioteca de allegro comentada),crie uma pra voce,faca as devidas alteracoes,e use git push origin nome_da_branch
