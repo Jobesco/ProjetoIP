@@ -72,7 +72,7 @@ void main(){
 	
 	int estado;
 	int desconectado = 0;
-	int aux = 0;
+	int aux = 0,auxBomba = 0;
 	char controle;
     int retorno = 0;
 
@@ -91,9 +91,10 @@ void main(){
 
 		inicioConexao = time(NULL);
 		atualConexao = time(NULL);
+		printf("Por favor aguarde!\n");
+
 		while(difftime(atualConexao,inicioConexao) < 2){
 			atualConexao = time(NULL);
-			printf("Por favor aguarde!(%.0lf segundos)\n",difftime(atualConexao,inicioConexao));
 			estado = connectToServer(IP);
 			if(estado == SERVER_UP)
 				break;
@@ -141,6 +142,9 @@ void main(){
 	                        if(basica.jogadores[k].pos_x == i && basica.jogadores[k].pos_y == j){
 	                            printf("%d",basica.jogadores[k].id+1); // valor p simbolizar o jogador
 	                            verifica++;
+	                        }else if(basica.jogadores[k].bomba == 1 && basica.jogadores[k].posbomba_x == i && basica.jogadores[k].posbomba_y == j){ //caso tenha uma bomba no mapa
+	                        	printf("b%d",basica.jogadores[k].id+1); //printa a bomba(mas o jogador vai em cima,caso esteja no mesmo bloco,por hora)
+	                        	verifica++;
 	                        }
 	                    }
 	                    if(verifica==0){ //se ele n printou ngm,ele printa a matriz
@@ -151,6 +155,23 @@ void main(){
 	                    }
                     }printf("\n");     
                 }
+            }
+
+            for(i=0;i<4;i++){ //loop referente a tratar a explosao
+            	if(basica.jogadores[k].bomba == 1){ //se existir uma bomba
+            		if(auxBomba == 0){
+            			inicioConexao = time(NULL);
+            			auxBomba++;
+            		}else{
+            			atualConexao = time(NULL);
+            			if(difftime(atualConexao,inicioConexao) >= 4){ //se a bomba estiver na hr de explodir (tempo sujeito a mudancas)
+            				printf("BOOM\n");
+
+            				auxBomba = 0;
+            			}
+            		}
+
+            	}
             }
 
             controle = getch();
