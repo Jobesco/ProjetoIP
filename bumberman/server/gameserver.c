@@ -51,7 +51,7 @@ typedef struct p_broadcast{
 } msg_todos;
 
 msg_todos basica; //essa eh a mensagem basica para todos a ser enviada. 
-struct msg_ret_t recebe_cliente[4];
+struct msg_ret_t confirmacao_cliente;
 msg_do_cliente recebe_do_cliente[4];
 
 void iniciar_jogo();
@@ -86,24 +86,29 @@ void main(){
 		}
       
     	for(i=0;i<4;i++){ //loop referente a receber e tratar mensagem
-    		recebe_cliente[i] =  recvMsgFromClient(&recebe_do_cliente[i],basica.jogadores[i].id,DONT_WAIT); //OBS: recebe_cliente -> struct q indica o status da mensagem recebida ~~ recebe_do_cliente -> struct msg_do_cliente com sua intencao de movimento ou bomba.
+
+    		confirmacao_cliente =  recvMsgFromClient(&recebe_do_cliente[i],basica.jogadores[i].id,DONT_WAIT); //OBS: confirmacao_cliente -> struct q indica o status da mensagem recebida ~~ recebe_do_cliente -> struct msg_do_cliente com sua intencao de movimento ou bomba.
     		
-    		if(recebe_cliente[i].status == MESSAGE_OK){
+    		if(confirmacao_cliente.status == MESSAGE_OK){
+                
         		if(recebe_do_cliente[i].bomba == 1){ //ou o server recebe uma bomba,ou uma movimentacao
+
         			basica.jogadores[i].bomba = 1;
         			basica.jogadores[i].posbomba_x = basica.jogadores[i].pos_x;
         			basica.jogadores[i].posbomba_y = basica.jogadores[i].pos_y;
 
         			broadcast(&basica,sizeof(msg_todos));
         			//basica.jogadores[i].bomba = 0; //nao existe mais bomba p servidor tratar,ele ja mandou para todos a informacao necessaria.
+
         		}else{
+
               		basica.jogadores[i].pos_x = recebe_do_cliente[i].pos_x; //altera a posicao dele em broadcast(como ele printa a matriz e depois o jogador de acordo com a localizacao,eu nao preciso alterar nada na matriz,pq nada eh alterado nela)
               		basica.jogadores[i].pos_y = recebe_do_cliente[i].pos_y;
 
               		broadcast(&basica,sizeof(msg_todos));
           		}
         	}
-        	if(recebe_cliente[i].status == DISCONNECT_MSG){
+        	if(confirmacao_cliente.status == DISCONNECT_MSG){
         		basica.jogadores[i].pos_x = -1; //se ele estiveer na posicao -1,ele nao ira printa-lo
         		basica.jogadores[i].pos_y = -1;
         	} 
