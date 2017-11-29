@@ -13,9 +13,8 @@
 
 char posicao[2] = {""};
 
-
 char matriz[tamanho_altura][tamanho_largura] = {
-    
+
     {pedra,pedra,pedra,pedra,pedra,pedra,pedra,pedra,pedra,pedra,pedra,pedra},
     {pedra,verd_1,verd_1,verd_1,verd_2,verd_1,verd_1,verd_1,verd_1,verd_1,verd_2,pedra},
     {pedra,verd_2,verd_1,verd_1,verd_1,verd_2,verd_1,verd_2,verd_1,verd_1,verd_1,pedra},
@@ -24,8 +23,15 @@ char matriz[tamanho_altura][tamanho_largura] = {
     {pedra,verd_1,verd_2,verd_1,verd_1,verd_1,verd_1,verd_1,verd_1,verd_1,verd_1,pedra},
     {pedra,verd_1,verd_1,verd_1,verd_1,verd_1,verd_1,verd_1,verd_1,verd_2,verd_1,pedra},
     {pedra,pedra,pedra,pedra,pedra,pedra,pedra,pedra,pedra,pedra,pedra,pedra}
-    
+
 };
+
+typedef struct{
+
+    long long segundo_inicial;
+    long long segundo_final;
+
+} bomba;
 
 typedef struct{
   char id;
@@ -35,7 +41,7 @@ typedef struct{
   char bomba; //se em algum momento,bomba for 1
   char posbomba_x;
   char posbomba_y;
-  
+
 } jogador;
 
 typedef struct mensagem_cliente{
@@ -47,9 +53,9 @@ typedef struct mensagem_cliente{
 } msg_do_cliente;
 
 typedef struct p_broadcast{
-  
+
   jogador jogadores[4]; //eh 2 pq recebe as posicoes(x,y) num plano cartesiano.
-  
+
 } msg_todos;
 
 
@@ -59,22 +65,21 @@ msg_todos basica;
 void tratar_intencao(char *controle);
 int verifica_posix(int posix_x, int posix_y);
 
-int jogador_perto(int posBLocal_x, int posBLocal_y){
+void inicia_tempo_bomba(struct tm tm_struct, bomba tempo_bomba){
 
-    if(matriz[posBLocal_x][posBLocal_y] == ){ // verifica se na posix da bomba tem um jogador
+    tempo_bomba.segundo_inicial = tm_struct->tm_sec; // deve retornar o tempo em segundos
+    tempo_bomba.segundo_final = tempo_bomba.segundo_inicial+4; // add 4 segundos ao tempo salvo
 
+}
 
-    }
-    if(matriz[posBLocal_x][posBLocal_y+1] == 0 || matriz[posBLocal_x][posBLocal_y+1] == 1 || matriz[posBLocal_x][posBLocal_y+1] == 2 || matriz[posBLocal_x][posBLocal_y+1] == 3){ // tem alguem por perto
+int verifica_tempo_bomba(bomba tempo_bomba){
 
-        switch(matriz[posBLocal_x][posBLocal_y+1]){ // continuar !!!!!!!!!!!!!
-
-            case 0:
-
-
-
-        }
-
+    if ((tempo_bomba.segundo_final - tempo_bomba.segundo_inicial) >= 4 ) { // caso o tempo da bomba tenha passado ou seja igual a 4 segundos
+        //a bomba explode!!!!
+        return 0;
+    }else{
+        // ainda tem tempo
+        return 1;
     }
 
 }
@@ -82,34 +87,33 @@ int jogador_perto(int posBLocal_x, int posBLocal_y){
 void main(){
 
 	char *IP;
-	
+
+    //Definicao da Bomba
+    bomba tempo_bomba = {0,0}; // struct p armazenar o tempo da bomba
+    // Fim definicao da Bomba
+
 	IP = (char*)calloc(50,sizeof(char));
 
 	if(IP==NULL){
 		printf("ERRO NA ALOCACAO\n");
 		exit(1);
 	}
-	
+
 	int estado;
 	int desconectado = 0;
 	int aux = 0,auxBomba = 0;
 	char controle;
     int retorno = 0;
-
+    int bomba_ativa = 0;
     int i,j,k;
     int tamanho_msg_entregue = 0;
     int verifica=0;
-    int posBLocal_x,posBLocal_y;
 
     time_t inicioConexao,atualConexao; //para garantir q ele continue conectando
-    time_t current_time;
-    time_t previous_time;
-    previous_time = time(NULL);
-    current_time = time(NULL);
 
-
+//Somente enquanto nao conecta
 	while(1){
-	
+
 		printf("Digite o IP onde deseja se conectar\n");
 
 		scanf(" %s",IP);
@@ -128,31 +132,32 @@ void main(){
 		}
 		break;
 	}
-	int existe_bomba = 0;
+//while do jogo
 
 	while(desconectado != 1){ // verifica se o client ainda joga
 
-        if(existe_bomba == 1){ // o user acabou de colocar uma bomba e o cronometro inicia
-
-            current_time = time(NULL); // a cada instante , recebe o tempo do relogio
-
-            if(difftime(current_time,previous_time)>=4){ // a bomba explode 
-
-                matriz[posBLocal_x][posBLocal_y] = 0; // volta ao normal
-
-                // verifica se existe alguem por perto !!!
-
-
-            }
-        } 
+        struct tm *tm_struct = localtime(time(NULL)); // struct p obter o tempo da bomba-(mantem atualizado)
 
         if(estado == SERVER_UP){ //conexao estabelecida // prosseguir
+
             if(aux==0){
+
             	aux++;
             	printf("Conectado!\n");
             	recvMsgFromServer(&minha_intencao,WAIT_FOR_IT);
             	printf("minha posicao eh %d - %d\n", minha_intencao.pos_x,minha_intencao.pos_y);
             	recvMsgFromServer(&basica,WAIT_FOR_IT);
+
+                //verifica se ainda tem tempo para a bomba explodir
+                if(bomba_ativa == 1){
+
+                    bomba_ativa = verifica_tempo_bomba(&tempo_bomba);// se retornar 1, a bomba continua ativa e verificando, senao, ela fica inativa(0)
+
+                }else if(bomba_ativa == 0){
+
+                    matriz[jogador.posbomba_x][jogador.posbomba_y] = 0; //  atualiza a matriz de volta, como se n houvesse bomba
+                    // implementar funcao que verifica se existem jogadores no range
+                }
 
             	for(i=0;i<8;i++){
                     for(j=0;j<12;j++){
@@ -169,11 +174,9 @@ void main(){
 	                    	else
 	                    		printf("N");
 	                    }
-                    }printf("\n");     
+                    }printf("\n");
                 }
             }
-
-
 
            	tamanho_msg_entregue = recvMsgFromServer(&basica,DONT_WAIT);
 
@@ -183,21 +186,13 @@ void main(){
                     for(j=0;j<12;j++){
                     	verifica = 0;
                     	for(k=0;k<4;k++){
-
-	                        if(basica.jogadores[k].pos_x == i && basica.jogadores[k].pos_y == j && (basica.jogadores[k].posbomba_x != i && basica.jogadores[k].posbomba_y != j)){
+	                        if(basica.jogadores[k].pos_x == i && basica.jogadores[k].pos_y == j){
 	                            printf("%d",basica.jogadores[k].id+1); // valor p simbolizar o jogador
 	                            verifica++;
 	                        }else if(basica.jogadores[k].bomba == 1 && basica.jogadores[k].posbomba_x == i && basica.jogadores[k].posbomba_y == j){ //caso tenha uma bomba no mapa
-	                        	printf("b%d",basica.jogadores[k].id+1); //printa a bomba(mas o jogador vai em cima,caso esteja no mesmo bloco,por hora)
-
-	                        	verifica++;
-                                matriz[i][j] = 'b'; // coloca uma bomba na matriz
-                                existe_bomba = 1; // comeca a contar o tempo
-                                // inicia o timer da bomba
-                                previous_time = time(NULL);
-                                posBLocal_x = i; // recebe o x e armazena
-                                posBLocal_y = j;
-
+	                        	//printf("b%d",basica.jogadores[k].id+1); //printa a bomba(mas o jogador vai em cima,caso esteja no mesmo bloco,por hora)
+                                printf("b");
+                                verifica++;
 	                        }
 	                    }
 	                    if(verifica==0){ //se ele n printou ngm,ele printa a matriz
@@ -206,24 +201,19 @@ void main(){
 	                    	else
 	                    		printf("N");
 	                    }
-                    }printf("\n");     
+                    }printf("\n");
                 }
             }
 
             for(i=0;i<4;i++){ //loop referente a tratar a explosao
-
             	if(basica.jogadores[k].bomba == 1){ //se existir uma bomba
-
             		if(auxBomba == 0){
-
             			inicioConexao = time(NULL);
             			auxBomba++;
-
             		}else{
             			atualConexao = time(NULL);
             			if(difftime(atualConexao,inicioConexao) >= 4){ //se a bomba estiver na hr de explodir (tempo sujeito a mudancas)
             				printf("BOOM\n");
-
             				auxBomba = 0;
             			}
             		}
@@ -233,45 +223,37 @@ void main(){
 
             controle = getch();
 	        tratar_intencao(&controle);
-            
+
             if(controle != NO_KEY_PRESSED){ //se ele apertou uma tecla
-
             	if(controle != 'K'){
-
 	            	retorno = sendMsgToServer(&minha_intencao,sizeof(msg_do_cliente)); // manda a intencao
+            	}else{ //  tem uma bomba a ser lancada
 
-            	}else{
-
-                    if(matriz[jogador.pos_x][jogador.posix_y] != 'b'){ // nao existe uma bomba na posicao atual
-
-                		retorno = sendMsgToServer(&minha_intencao,sizeof(msg_do_cliente));
-                		minha_intencao.bomba = 0;
-                        time_t tempo_atual = time(NULL);
-                        //conta_tempo(tempo_atual,4);
-
-                    }
+            		retorno = sendMsgToServer(&minha_intencao,sizeof(msg_do_cliente));
+                    inicia_tempo_bomba(&tm_struct,&tempo_bomba); // verificar sintaxe depois
+                    bomba_ativa = 1; // informa que uma bomba foi lancada
+            		minha_intencao.bomba = 0;
             	}
-
             }
 
             if(retorno == SERVER_DISCONNECTED){
 	        	desconectado = 1;
 	        }
-        
+
         }else if(estado == SERVER_DOWN){ //nao achou o server
-            
+
             printf("Servidor nao encontrado :S\n");
             break;
         }else if(estado == SERVER_FULL){ // cheio
-            
+
             printf("Servidor lotado!\nAguarde proxima partida :/\n");
             break;
         }else if(estado == SERVER_CLOSED){ // n aceita conexao
-            
+
             printf("Servidor nao aceita novas conexoes! >:U\n");
             break;
         }else if(estado == SERVER_TIMEOUT){ // demorou p responder
-            
+
             printf("Voce esperou demais, verifique sua conexao de dados! :P\n");
             break;
         }
@@ -279,7 +261,7 @@ void main(){
 }
 
 int verifica_posix(int posix_x, int posix_y){
-    
+
     if(matriz[posix_x][posix_y] == 1 || matriz[posix_x][posix_y] == 2){
         return 1;
     }else{
@@ -291,7 +273,7 @@ void tratar_intencao(char *controle){
 	if(controle[0]>96){
 		controle[0] -= 32;
 	}
-	
+
 	switch(controle[0]){
 		case 'W':
             if(verifica_posix(minha_intencao.pos_x-1, minha_intencao.pos_y) == 1){
@@ -299,21 +281,21 @@ void tratar_intencao(char *controle){
             }else
             	controle[0] = NO_KEY_PRESSED;
             break;
-            
+
         case 'A':
             if(verifica_posix(minha_intencao.pos_x, minha_intencao.pos_y-1) == 1){
                 minha_intencao.pos_y -= 1;
             }else
             	controle[0] = NO_KEY_PRESSED;
             break;
-            
+
         case 'S':
             if(verifica_posix(minha_intencao.pos_x+1, minha_intencao.pos_y) == 1){
                 minha_intencao.pos_x += 1;
             }else
             	controle[0] = NO_KEY_PRESSED;
             break;
-            
+
         case 'D':
             if(verifica_posix(minha_intencao.pos_x, minha_intencao.pos_y+1) == 1){
                 minha_intencao.pos_y += 1;
