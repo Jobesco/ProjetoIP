@@ -173,7 +173,7 @@ void main(){
               if(verifica_fim_jogo() == 1){
                   desconectado = 1;
                   printf("Deseja Jogar novamente?\n0 - Nao\n1 - Sim");
-                  scanf("%d",&respostaJogo);
+                  scanf("%c",&respostaJogo);
               } // autoexplicativo
 
             }else if(estado == SERVER_DOWN){ //nao achou o server
@@ -208,7 +208,6 @@ int verifica_fim_jogo(){
     if(quemGanhou == max_clients-1){//quer dizer que o jogo acabou.
 
         if(minha_intencao.pos_x == -1){
-            printf("Voce perdeu!\n");
             alterar_historico(0); //se for 0,ele perdeu
             return 1;
         }else{
@@ -382,6 +381,7 @@ void contador_Bombas(int inicio_aux_Bomba[],time_t inicio_Bomba[],time_t atual_B
                         minha_intencao.pos_y = -1;
                         matou = 0;
                         sendMsgToServer(&minha_intencao,sizeof(msg_do_cliente));
+                        printf("Voce perdeu!\n");
                     }
                     inicio_aux_Bomba[i] = 0; //prepara para receber outra bomba
                     printf("BOOM\n");
