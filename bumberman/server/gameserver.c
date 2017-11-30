@@ -56,7 +56,7 @@ msg_do_cliente recebe_do_cliente[4];
 
 void iniciar_jogo();
 void estabelecer_conexao();
-void tratar_broadcast(); //trata e envia a struct basica
+void tratar_broadcast(int i); //trata e envia a struct basica
 
 void main(){
 
@@ -89,7 +89,7 @@ void main(){
 
     		if(confirmacao_cliente.status == MESSAGE_OK){ //se ele recebeu uma mensagem
 
-        		tratar_broadcast(); //vai tratar e enviar a struct basica de acordo com a mensagem que ele recebeu(zero parametros pois a struct eh global)
+        		tratar_broadcast(i); //vai tratar e enviar a struct basica de acordo com a mensagem que ele recebeu(zero parametros pois a struct eh global)
         	}
         	if(confirmacao_cliente.status == DISCONNECT_MSG){
         		basica.jogadores[i].pos_x = -1; //se ele estiveer na posicao -1,ele nao ira printa-lo
@@ -136,7 +136,7 @@ void iniciar_jogo(){
     basica.jogadores[3].pos_y = 10;
 }
 
-void tratar_broadcast(){
+void tratar_broadcast(int i){
     if(recebe_do_cliente[i].bomba == 1){ //ou o server recebe uma bomba,ou uma movimentacao
         basica.jogadores[i].bomba = 1; //atribui a intencao de bomba e sua posicao,em baixo do jogador
         basica.jogadores[i].posbomba_x = basica.jogadores[i].pos_x;
