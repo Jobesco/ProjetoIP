@@ -252,17 +252,18 @@ void contador_Bombas(int inicio_aux_Bomba[],time_t inicio_Bomba[],time_t atual_B
           if(inicio_aux_Bomba[i] != 0){ //ou seja,ele tiver um contador iniciado
               atual_Bomba[i] = time(NULL);
               if(difftime(atual_Bomba[i],inicio_Bomba[i]) >= 3){ //a bomba explode!
-                  for(j=0;j<max_clients;j++){ // percorre cada jogador verificando se ele está no range de explosao
-                    //controla_raio_explosao(j);// verifica os arredores da explosao,passa j pq j representa o ID do jogador
-
-                    if(retorno != 0){ // o jogador está no range de explosao // a variavel retono armazena o id do jogador que morreu
-                      // atribui um valor fora do campo existente, impedindo que o jogador volte ao jogo
-                      basica.jogadores[j].pos_x = -1;
-                      basica.jogadores[j].pos_y = -1;
-                    }
-                  }
                   inicio_aux_Bomba[i] = 0;
                   printf("BOOM\n");
+
+                 //  for(j=0;j<max_clients;j++){ // percorre cada jogador verificando se ele está no range de explosao
+                 //    //controla_raio_explosao(j);// verifica os arredores da explosao,passa j pq j representa o ID do jogador
+                 //
+                 //    if(retorno != 0){ // o jogador está no range de explosao // a variavel retono armazena o id do jogador que morreu
+                 //      // atribui um valor fora do campo existente, impedindo que o jogador volte ao jogo
+                 //      basica.jogadores[j].pos_x = -1;
+                 //      basica.jogadores[j].pos_y = -1;
+                 //    }
+                 // }
               }
           }
     }
