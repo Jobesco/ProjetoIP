@@ -12,19 +12,6 @@
 
 char id[4];
 
-char matriz[tamanho_altura][tamanho_largura] = {
-
-    {pedra,pedra,pedra,pedra,pedra,pedra,pedra,pedra,pedra,pedra,pedra,pedra},
-    {pedra,verd_1,verd_1,verd_1,verd_2,verd_1,verd_1,verd_1,verd_1,verd_1,verd_2,pedra},
-    {pedra,verd_2,verd_1,verd_1,verd_1,verd_2,verd_1,verd_2,verd_1,verd_1,verd_1,pedra},
-    {pedra,verd_1,verd_1,verd_1,verd_2,verd_1,verd_1,verd_1,verd_1,verd_1,verd_1,pedra},
-    {pedra,verd_1,verd_1,verd_2,verd_1,verd_2,verd_1,verd_1,verd_1,verd_1,verd_1,pedra},
-    {pedra,verd_1,verd_2,verd_1,verd_1,verd_1,verd_1,verd_1,verd_1,verd_1,verd_1,pedra},
-    {pedra,verd_1,verd_1,verd_1,verd_1,verd_1,verd_1,verd_1,verd_1,verd_2,verd_1,pedra},
-    {pedra,pedra,pedra,pedra,pedra,pedra,pedra,pedra,pedra,pedra,pedra,pedra}
-
-};
-
 typedef struct mensagem_cliente{
 	char pos_x;
 	char pos_y;
@@ -141,6 +128,8 @@ void tratar_broadcast(int i){
         basica.jogadores[i].bomba = 1; //atribui a intencao de bomba e sua posicao,em baixo do jogador
         basica.jogadores[i].posbomba_x = basica.jogadores[i].pos_x;
         basica.jogadores[i].posbomba_y = basica.jogadores[i].pos_y;
+
+		printf("jogador %d jogou uma bomba\n",i);
 
         broadcast(&basica,sizeof(msg_todos));
         basica.jogadores[i].bomba = 0; //nao existe mais intencao de bomba
