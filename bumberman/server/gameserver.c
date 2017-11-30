@@ -51,11 +51,12 @@ typedef struct p_broadcast{
 } msg_todos;
 
 msg_todos basica; //essa eh a mensagem basica para todos a ser enviada.
-struct msg_ret_t recebe_cliente;
+struct msg_ret_t confirmacao_cliente;
 msg_do_cliente recebe_do_cliente[4];
 
 void iniciar_jogo();
 void estabelecer_conexao();
+void tratar_broadcast(); //trata e envia a struct basica
 
 void main(){
 
@@ -84,25 +85,13 @@ void main(){
 		}
 
     	for(i=0;i<4;i++){ //loop referente a receber e tratar mensagem
-    		recebe_cliente =  recvMsgFromClient(&recebe_do_cliente[i],basica.jogadores[i].id,DONT_WAIT); //OBS: recebe_cliente -> struct q indica o status da mensagem recebida ~~ recebe_do_cliente -> struct msg_do_cliente com sua intencao de movimento ou bomba.
+    		confirmacao_cliente =  recvMsgFromClient(&recebe_do_cliente[i],basica.jogadores[i].id,DONT_WAIT); //OBS: confirmacao_cliente -> struct q indica o status da mensagem recebida ~~ recebe_do_cliente -> struct msg_do_cliente com sua intencao de movimento ou bomba.
 
-    		if(recebe_cliente.status == MESSAGE_OK){ //se ele recebeu uma mensagem
+    		if(confirmacao_cliente.status == MESSAGE_OK){ //se ele recebeu uma mensagem
 
-        		if(recebe_do_cliente[i].bomba == 1){ //ou o server recebe uma bomba,ou uma movimentacao
-        			basica.jogadores[i].bomba = 1; //atribui a intencao de bomba e sua posicao,em baixo do jogador
-        			basica.jogadores[i].posbomba_x = basica.jogadores[i].pos_x;
-        			basica.jogadores[i].posbomba_y = basica.jogadores[i].pos_y;
-
-        			broadcast(&basica,sizeof(msg_todos));
-        			basica.jogadores[i].bomba = 0; //nao existe mais bomba p servidor tratar,ele ja mandou para todos a informacao necessaria.
-        		}else{
-              		basica.jogadores[i].pos_x = recebe_do_cliente[i].pos_x; //altera a posicao dele em broadcast(como ele printa a matriz e depois o jogador de acordo com a localizacao,eu nao preciso alterar nada na matriz,pq nada eh alterado nela)
-              		basica.jogadores[i].pos_y = recebe_do_cliente[i].pos_y;
-
-              		broadcast(&basica,sizeof(msg_todos));
-          		}
+        		tratar_broadcast(); //vai tratar e enviar a struct basica de acordo com a mensagem que ele recebeu(zero parametros pois a struct eh global)
         	}
-        	if(recebe_cliente.status == DISCONNECT_MSG){
+        	if(confirmacao_cliente.status == DISCONNECT_MSG){
         		basica.jogadores[i].pos_x = -1; //se ele estiveer na posicao -1,ele nao ira printa-lo
         		basica.jogadores[i].pos_y = -1;
         	}
@@ -145,4 +134,20 @@ void iniciar_jogo(){
     basica.jogadores[3].id = 3;
     basica.jogadores[3].pos_x = 6;
     basica.jogadores[3].pos_y = 10;
+}
+
+void tratar_broadcast(){
+    if(recebe_do_cliente[i].bomba == 1){ //ou o server recebe uma bomba,ou uma movimentacao
+        basica.jogadores[i].bomba = 1; //atribui a intencao de bomba e sua posicao,em baixo do jogador
+        basica.jogadores[i].posbomba_x = basica.jogadores[i].pos_x;
+        basica.jogadores[i].posbomba_y = basica.jogadores[i].pos_y;
+
+        broadcast(&basica,sizeof(msg_todos));
+        basica.jogadores[i].bomba = 0; //nao existe mais intencao de bomba
+    }else{
+        basica.jogadores[i].pos_x = recebe_do_cliente[i].pos_x; //altera a posicao dele em broadcast(como ele printa a matriz e depois o jogador de acordo com a localizacao,eu nao preciso alterar nada na matriz,pq nada eh alterado nela)
+        basica.jogadores[i].pos_y = recebe_do_cliente[i].pos_y;
+
+        broadcast(&basica,sizeof(msg_todos));
+    }
 }
