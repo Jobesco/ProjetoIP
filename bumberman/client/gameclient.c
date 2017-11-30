@@ -12,6 +12,14 @@
 
 char posicao[2] = {""};
 
+typedef struct historico{
+
+  int n_bombas_soltadas;
+  int n_partidas_jogadas;
+  int n_partidas_ganhas;
+  double win_ratio; // partidas ganhas / partidas jogadas
+
+}historico;
 
 char matriz[tamanho_altura][tamanho_largura] = {
 
@@ -47,22 +55,34 @@ typedef struct mensagem_cliente{
 
 typedef struct p_broadcast{
 
-  jogador jogadores[4]; //eh 2 pq recebe as posicoes(x,y) num plano cartesiano.
+  jogador jogadores[4];
 
 } msg_todos;
 
-
+//variaveis globais usadas
+char quemGanhou = 0;
 msg_do_cliente minha_intencao;
 msg_todos basica;
 time_t inicioJogo,atualJogo;
-
 int verifica=0; //tambem é global,referente a funcao printa_matriz
+historico hist; // declara struct do tipo historico
+historico para_ler;
+int n_bombas = 0;
+//fim das variaveis globais
 
+
+//funcoes usadas.
 void tratar_intencao(char *controle,int inicio_aux_Bomba[],char *possoBombar);
 int verifica_posix(int posix_x, int posix_y,int inicio_aux_Bomba[]);
 void printa_matriz(int inicio_aux_Bomba[]);
 void contador_Bombas(int inicio_aux_Bomba[],time_t inicio_Bomba[],time_t atual_Bomba[],char *possoBombar);
 char controla_raio_explosao(char matou,int inicio_aux_Bomba[]);
+int verifica_fim_jogo();
+void apresentar_historico();
+void salvar_historico();
+void alterar_historico(char ganhou);
+//fim das funcoes usadas
+
 
 void main(){
 
@@ -81,13 +101,9 @@ void main(){
 	char controle;
     int retorno = 0;
     int i,j,k; //estou desglobalizando os contadores,apenas para manter um funcionamento mais saudavel das funcoes
-
     int tamanho_msg_entregue = 0;
-
     int inicio_aux_Bomba[max_clients] = {0};
-
     char possoBombar = 0;
-
     time_t inicioConexao,atualConexao; //para garantir q ele continue conectando
     time_t inicio_Bomba[max_clients],atual_Bomba[max_clients];
 
@@ -109,7 +125,8 @@ void main(){
 				break;
 		}
 		break;
-	}
+        n_bombas = 0;
+    }
 
 	while(desconectado != 1){ // verifica se o client ainda joga
 
@@ -118,15 +135,11 @@ void main(){
             	aux++;
             	printf("Conectado!\n");
             	recvMsgFromServer(&minha_intencao,WAIT_FOR_IT); //vai receber sua posicao e armazenar em minha_intencao(que a partir da posicao dele,sera modificada conforme ele se movimenta)
-
             	printf("minha posicao eh %d - %d\n", minha_intencao.pos_x,minha_intencao.pos_y);
             	recvMsgFromServer(&basica,WAIT_FOR_IT);
-
             	printa_matriz(inicio_aux_Bomba);
-
-                inicioJogo = time(NULL); //inicia o timer do jogo
+              inicioJogo = time(NULL); //inicia o timer do jogo
             }
-
             if(difftime(atualJogo = time(NULL),inicioJogo) >= 240){ //referente ao tempo de cada partida
                 desconectado = 0;
             }
@@ -149,10 +162,11 @@ void main(){
             		minha_intencao.bomba = 0; //reseta,pois ele nao tem mais INTENCAO de enviar uma bomba p server dar broadcast
             	}
             }
-
             if(retorno == SERVER_DISCONNECTED){
 	        	desconectado = 1;
 	        }
+
+          if(verifica_fim_jogo() == 1){desconectado = 1; break;} // autoexplicativo
 
         }else if(estado == SERVER_DOWN){ //nao achou o server
 
@@ -172,6 +186,78 @@ void main(){
             break;
         }
     }
+}
+
+int verifica_fim_jogo(){
+    int i;
+    quemGanhou = 0;
+    for(i=0;i<max_clients;i++){
+        if(basica.jogadores[i].pos_x == -1){
+            quemGanhou++;
+        }
+    }
+    if(quemGanhou == max_clients-1){//quer dizer que o jogo acabou.
+
+        if(minha_intencao.pos_x == -1){
+            printf("Voce perdeu!\n");
+            alterar_historico(0); //se for 0,ele perdeu
+            return 1;
+        }else{
+            printf("Voce ganhou!\n");
+            alterar_historico(1); //se for 1,ele ganhou
+            return 1;
+        }
+    }
+    return 0;
+}
+
+void apresentar_historico(){ // usar allegro em uma ViewController diferente
+
+    FILE *file = fopen("status.bin","r");
+
+    if(file != NULL){
+
+        fread(&hist,sizeof(hist),1,file);
+        printf("Voce ja soltou %d bombas ate agora!\n",hist.n_bombas_soltadas);
+        printf("Voce ganhou %d partidas ate agora,hehe.\n",hist.n_partidas_ganhas);
+        printf("Voce perdeu %d de um total de %d\n",hist.n_partidas_jogadas - hist.n_partidas_ganhas,hist.n_partidas_jogadas );
+        printf("Um Win-Ratio de %.0lf!\n",hist.win_ratio*100);
+        fclose(file);
+
+    }
+}
+
+void salvar_historico(){
+
+  FILE *file = fopen("status.bin","w");
+
+    if(file != NULL){
+
+        fwrite(&hist,sizeof(hist),1,file); // escrever
+        fclose(file);
+
+    }
+}
+
+void alterar_historico(char ganhou){
+
+    FILE *file = fopen("status.bin","r"); // se o arquivo nao existir, eh criado um
+
+    if(file != NULL){ // caso o arquivo possa ser aberto
+
+        fread(&hist,sizeof(hist),1,file);
+        hist.n_bombas_soltadas += n_bombas;
+        if(ganhou == 0){ // o jogador perdeu
+          hist.n_partidas_jogadas++;
+          hist.win_ratio = hist.n_partidas_ganhas / hist.n_partidas_jogadas;// ve aqui
+        }else{// ele ganhou
+          hist.n_partidas_jogadas++;
+          hist.n_partidas_ganhas++;
+          hist.win_ratio = hist.n_partidas_ganhas / hist.n_partidas_jogadas;
+        }
+        fclose(file);
+    }
+    salvar_historico();
 }
 
 int verifica_posix(int posix_x, int posix_y,int inicio_aux_Bomba[]){ //posix diz onde eu quero estar
@@ -228,6 +314,7 @@ void tratar_intencao(char *controle,int inicio_aux_Bomba[],char *possoBombar){
             if(possoBombar[0] == 0){ //se ele n tiver nenhuma bomba no mapa ja
 			         minha_intencao.bomba = 1;
                possoBombar[0] = 1;
+               n_bombas++; // incrementa o nº de bombas lançadas
             }
             break;
 	 }
@@ -268,6 +355,7 @@ void contador_Bombas(int inicio_aux_Bomba[],time_t inicio_Bomba[],time_t atual_B
     for(i=0;i<max_clients;i++){ //contador das bombas,atualmente independe de basica para continuar rodando,mas depende para inicializar(como deve ser)
 
           if(basica.jogadores[i].bomba == 1){ //se ele tiver recebido uma bomba
+
               inicio_aux_Bomba[i] = 1; // 0 -- ninguem botou bomba // 1 -- alguem botou bomba
               inicio_Bomba[i] = time(NULL); //inicializa o contador
               basica.jogadores[i].bomba = 0; // impede a reinicializacao do timer da bomba!
@@ -280,7 +368,7 @@ void contador_Bombas(int inicio_aux_Bomba[],time_t inicio_Bomba[],time_t atual_B
                     possoBombar[0] = 0; //reseta a condicao de usar bomba,podendo novamente soltar uma bomba
                     char matou;
                     matou = controla_raio_explosao(matou,inicio_aux_Bomba);
-                    if(matou == 1){
+                    if(matou == 1){ // isso significa que ele morreu
                         minha_intencao.pos_x = -1;
                         minha_intencao.pos_y = -1;
                         matou = 0;
