@@ -13,6 +13,7 @@
 
 char posicao[2] = {""};
 
+
 char matriz[tamanho_altura][tamanho_largura] = {
 
     {pedra,pedra,pedra,pedra,pedra,pedra,pedra,pedra,pedra,pedra,pedra,pedra},
@@ -27,13 +28,6 @@ char matriz[tamanho_altura][tamanho_largura] = {
 };
 
 typedef struct{
-
-    long long segundo_inicial;
-    long long segundo_final;
-
-} bomba;
-
-typedef struct{
   char id;
   char pos_x;
   char pos_y;
@@ -45,7 +39,8 @@ typedef struct{
 } jogador;
 
 typedef struct mensagem_cliente{
-	char pos_x;
+
+    char pos_x;
   	char pos_y;
 
   	char bomba; //0 -- nao tentei jogar bomba // 1 -- tentei jogar bomba
@@ -62,35 +57,18 @@ typedef struct p_broadcast{
 msg_do_cliente minha_intencao;
 msg_todos basica;
 
+int i,j,k; //contadores globais!!!
+int verifica=0; //tambem é global,referente a funcao printa_matriz
+
 void tratar_intencao(char *controle);
 int verifica_posix(int posix_x, int posix_y);
-
-void inicia_tempo_bomba(struct tm tm_struct, bomba tempo_bomba){
-
-    tempo_bomba.segundo_inicial = tm_struct->tm_sec; // deve retornar o tempo em segundos
-    tempo_bomba.segundo_final = tempo_bomba.segundo_inicial+4; // add 4 segundos ao tempo salvo
-
-}
-
-int verifica_tempo_bomba(bomba tempo_bomba){
-
-    if ((tempo_bomba.segundo_final - tempo_bomba.segundo_inicial) >= 4 ) { // caso o tempo da bomba tenha passado ou seja igual a 4 segundos
-        //a bomba explode!!!!
-        return 0;
-    }else{
-        // ainda tem tempo
-        return 1;
-    }
-
-}
+void printa_matriz(int inicio_aux_Bomba[]);
+void contador_Bombas(int inicio_aux_Bomba[],time_t inicio_Bomba[],time_t atual_Bomba[]);
+int controla_raio_explosao(basica jogador_1,int retorno);
 
 void main(){
 
 	char *IP;
-
-    //Definicao da Bomba
-    bomba tempo_bomba = {0,0}; // struct p armazenar o tempo da bomba
-    // Fim definicao da Bomba
 
 	IP = (char*)calloc(50,sizeof(char));
 
@@ -104,14 +82,14 @@ void main(){
 	int aux = 0,auxBomba = 0;
 	char controle;
     int retorno = 0;
-    int bomba_ativa = 0;
-    int i,j,k;
+
     int tamanho_msg_entregue = 0;
-    int verifica=0;
+
+    int inicio_aux_Bomba[max_clients] = {0};
 
     time_t inicioConexao,atualConexao; //para garantir q ele continue conectando
+    time_t inicio_Bomba[max_clients],atual_Bomba[max_clients];
 
-//Somente enquanto nao conecta
 	while(1){
 
 		printf("Digite o IP onde deseja se conectar\n");
@@ -124,7 +102,6 @@ void main(){
 		printf("Por favor aguarde!\n");
 
 		while(difftime(atualConexao,inicioConexao) < 2){
-
 			atualConexao = time(NULL);
 			estado = connectToServer(IP);
 			if(estado == SERVER_UP)
@@ -132,107 +109,39 @@ void main(){
 		}
 		break;
 	}
-//while do jogo
 
 	while(desconectado != 1){ // verifica se o client ainda joga
 
-        struct tm *tm_struct = localtime(time(NULL)); // struct p obter o tempo da bomba-(mantem atualizado)
-
         if(estado == SERVER_UP){ //conexao estabelecida // prosseguir
-
             if(aux==0){
-
             	aux++;
             	printf("Conectado!\n");
-            	recvMsgFromServer(&minha_intencao,WAIT_FOR_IT);
+            	recvMsgFromServer(&minha_intencao,WAIT_FOR_IT); //vai receber sua posicao e armazenar em minha_intencao(que a partir da posicao dele,sera modificada conforme ele se movimenta)
+
             	printf("minha posicao eh %d - %d\n", minha_intencao.pos_x,minha_intencao.pos_y);
             	recvMsgFromServer(&basica,WAIT_FOR_IT);
 
-                //verifica se ainda tem tempo para a bomba explodir
-                if(bomba_ativa == 1){
-
-                    bomba_ativa = verifica_tempo_bomba(&tempo_bomba);// se retornar 1, a bomba continua ativa e verificando, senao, ela fica inativa(0)
-
-                }else if(bomba_ativa == 0){
-
-                    matriz[jogador.posbomba_x][jogador.posbomba_y] = 0; //  atualiza a matriz de volta, como se n houvesse bomba
-                    // implementar funcao que verifica se existem jogadores no range
-                }
-
-            	for(i=0;i<8;i++){
-                    for(j=0;j<12;j++){
-                    	verifica = 0;
-                    	for(k=0;k<4;k++){
-	                        if(basica.jogadores[k].pos_x == i && basica.jogadores[k].pos_y == j){
-	                            printf("%d",basica.jogadores[k].id+1); // valor p simbolizar o jogador
-	                            verifica++;
-	                        }
-	                    }
-	                    if(verifica==0){ //se ele n printou ngm,ele printa a matriz
-	                    	if(matriz[i][j] == 1 || matriz[i][j] == 2)
-	                    		printf("0");
-	                    	else
-	                    		printf("N");
-	                    }
-                    }printf("\n");
-                }
+            	printa_matriz(inicio_aux_Bomba);
             }
 
-           	tamanho_msg_entregue = recvMsgFromServer(&basica,DONT_WAIT);
+           	tamanho_msg_entregue = recvMsgFromServer(&basica,DONT_WAIT); //recebe mensagem
 
             if(tamanho_msg_entregue != NO_MESSAGE){ // a mensagem foi recebida!
-            	system("clear");
-                for(i=0;i<8;i++){
-                    for(j=0;j<12;j++){
-                    	verifica = 0;
-                    	for(k=0;k<4;k++){
-	                        if(basica.jogadores[k].pos_x == i && basica.jogadores[k].pos_y == j){
-	                            printf("%d",basica.jogadores[k].id+1); // valor p simbolizar o jogador
-	                            verifica++;
-	                        }else if(basica.jogadores[k].bomba == 1 && basica.jogadores[k].posbomba_x == i && basica.jogadores[k].posbomba_y == j){ //caso tenha uma bomba no mapa
-	                        	//printf("b%d",basica.jogadores[k].id+1); //printa a bomba(mas o jogador vai em cima,caso esteja no mesmo bloco,por hora)
-                                printf("b");
-                                verifica++;
-	                        }
-	                    }
-	                    if(verifica==0){ //se ele n printou ngm,ele printa a matriz
-	                    	if(matriz[i][j] == 1 || matriz[i][j] == 2)
-	                    		printf("0");
-	                    	else
-	                    		printf("N");
-	                    }
-                    }printf("\n");
-                }
+            	system("clear"); //limpa o cmd
+                printa_matriz(inicio_aux_Bomba); //com certeza nao printa a matriz(gerar humor,ele printa sim)
             }
 
-            for(i=0;i<4;i++){ //loop referente a tratar a explosao
-            	if(basica.jogadores[k].bomba == 1){ //se existir uma bomba
-            		if(auxBomba == 0){
-            			inicioConexao = time(NULL);
-            			auxBomba++;
-            		}else{
-            			atualConexao = time(NULL);
-            			if(difftime(atualConexao,inicioConexao) >= 4){ //se a bomba estiver na hr de explodir (tempo sujeito a mudancas)
-            				printf("BOOM\n");
-            				auxBomba = 0;
-            			}
-            		}
+            contador_Bombas(inicio_aux_Bomba,inicio_Bomba,atual_Bomba); //ve se tem bomba
 
-            	}
-            }
-
-            controle = getch();
-	        tratar_intencao(&controle);
+            controle = getch(); //recebe um valor em char que indica a tecla apertada,retorna NO_KEY_PRESSED se ele nao apertou tecla alguma
+            tratar_intencao(&controle); //verifica se ele pode executar o movimento antes mesmo de enviar para o servidor,assim,o servidor executa menos tarefas
 
             if(controle != NO_KEY_PRESSED){ //se ele apertou uma tecla
-            	if(controle != 'K'){
-	            	retorno = sendMsgToServer(&minha_intencao,sizeof(msg_do_cliente)); // manda a intencao
-            	}else{ //  tem uma bomba a ser lancada
-
-            		retorno = sendMsgToServer(&minha_intencao,sizeof(msg_do_cliente));
-                    inicia_tempo_bomba(&tm_struct,&tempo_bomba); // verificar sintaxe depois
-                    bomba_ativa = 1; // informa que uma bomba foi lancada
-            		minha_intencao.bomba = 0;
+            	if(controle != 'K'){ //se ele nao apertou K,ele tentou se mover(verificado antes por tratar_intencao)
+	            	retorno = sendMsgToServer(&minha_intencao,sizeof(msg_do_cliente)); // manda a intencao de bomba
+            	}else{
+            		retorno = sendMsgToServer(&minha_intencao,sizeof(msg_do_cliente)); //manda a intencao de movimento,mas a struct ja contem bomba e movimento,entao nao faz diferenca
+            		minha_intencao.bomba = 0; //reseta,pois ele nao tem mais INTENCAO de enviar uma bomba p server dar broadcast
             	}
             }
 
@@ -258,6 +167,30 @@ void main(){
             break;
         }
     }
+}
+
+int controla_raio_explosao(basica jogador_1,int retorno){ // busca por jogadores proximos ao raio de explosao
+
+    if(jogador_1.posix_x+1 == jogador_1.posbomba_x && jogador_1.posix_y == jogador_1.posbomba_y){ // jogador na esquerda
+
+      retorno = jogador_1.id; // retorna o id do jogador
+
+    }else if(jogador_1.posix_x-1 == jogador_1.posbomba_x && jogador_1.posix_y == jogador_1.posbomba_y){ // jogador na direita
+
+      retorno = jogador_1.id;
+
+    }else if(jogador_1.posix_x == jogador_1.posbomba_x && jogador_1.posix_y+1 == jogador_1.posbomba_y){// jogador em baixo
+
+      retorno = jogador_1.id;
+
+    }else if(jogador_1.posix_x == jogador_1.posbomba_x && jogador_1.posix_y-1 == jogador_1.posbomba_y){ // jogador em cima
+
+      retorno = jogador_1.id;
+
+    }
+
+  return retorno;
+
 }
 
 int verifica_posix(int posix_x, int posix_y){
@@ -306,4 +239,55 @@ void tratar_intencao(char *controle){
 			minha_intencao.bomba = 1;
 			break;
 	}
+}
+
+void printa_matriz(int inicio_aux_Bomba[]){
+    for(i=0;i<tamanho_altura;i++){
+        for(j=0;j<tamanho_largura;j++){
+            verifica = 0;
+            for(k=0;k<4;k++){
+                if(basica.jogadores[k].pos_x == i && basica.jogadores[k].pos_y == j){
+                    printf("%d",basica.jogadores[k].id+1); // valor p simbolizar o jogador
+                    verifica++;
+                }else if(inicio_aux_Bomba[k] == 1 && basica.jogadores[k].posbomba_x == i && basica.jogadores[k].posbomba_y == j){ //caso tenha uma bomba no mapa
+                    printf("b"); //printa a bomba(mas o jogador vai em cima,caso esteja no mesmo bloco,por hora)
+                    verifica++;
+                }
+            }
+            if(verifica==0){ //se ele n printou ngm,ele printa a matriz
+                if(matriz[i][j] == 1 || matriz[i][j] == 2)
+                    printf("0");
+                else
+                    printf("N");
+            }
+        }printf("\n");
+    }
+}
+
+void contador_Bombas(int inicio_aux_Bomba[],time_t inicio_Bomba[],time_t atual_Bomba[]){
+
+    for(i=0;i<max_clients;i++){ //contador das bombas,atualmente independe de basica para continuar rodando,mas depende para inicializar(como deve ser)
+
+          if(basica.jogadores[i].bomba == 1){ //se ele tiver recebido uma bomba
+              inicio_aux_Bomba[i] = 1; // 0 -- ninguem botou bomba // 1 -- alguem botou bomba
+              inicio_Bomba[i] = time(NULL); //inicializa o contador
+          }
+          if(inicio_aux_Bomba[i] != 0){ //ou seja,ele tiver um contador iniciado
+              atual_Bomba[i] = time(NULL);
+              if(difftime(atual_Bomba[i],inicio_Bomba[i]) >= 3){ //a bomba explode!
+                  int retorno = 0;
+                  for(j=0;j<max_clients;j++){ // percorre cada jogador verificando se ele está no range de explosao
+                    retorno = controla_raio_explosao(basica.jogadores[i],retorno);// verifica os arredores da explosao
+                    //a variavel retono armazena o id do jogador que morreu
+                    if(retorno != 0){// o jogador está no range de explosao
+                      // atribui um valor fora do campo existente, impedindo que o jogador volte ao jogo
+                      basica.jogadores[j].posix_x = -1;
+                      basica.jogadores[j].posix_y = -1;
+                    }
+                  }
+                  inicio_aux_Bomba[i] = 0;
+                  printf("BOOM\n");
+              }
+          }
+    }
 }
