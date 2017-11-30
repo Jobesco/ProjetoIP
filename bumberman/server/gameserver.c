@@ -95,7 +95,10 @@ void main(){
         		basica.jogadores[i].pos_x = -1; //se ele estiveer na posicao -1,ele nao ira printa-lo
         		basica.jogadores[i].pos_y = -1;
         	}
-    	}
+            if(basica.jogadores[i].pos_x == -1){ //debugger
+                printf("jogador %d morreu\n",id[i]);
+            }
+        }
     }
 }
 

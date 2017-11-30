@@ -62,6 +62,7 @@ void tratar_intencao(char *controle);
 int verifica_posix(int posix_x, int posix_y);
 void printa_matriz(int inicio_aux_Bomba[]);
 void contador_Bombas(int inicio_aux_Bomba[],time_t inicio_Bomba[],time_t atual_Bomba[]);
+char controla_raio_explosao(char matou);
 
 void main(){
 
@@ -250,7 +251,42 @@ void contador_Bombas(int inicio_aux_Bomba[],time_t inicio_Bomba[],time_t atual_B
               if(difftime(atual_Bomba[i],inicio_Bomba[i]) >= 3){ //a bomba explode!
                   inicio_aux_Bomba[i] = 0;
                   printf("BOOM\n");
+
+                  char matou;
+                  matou = controla_raio_explosao(matou); //ele vai pegar o contador j pq i esta sendo usado ja
+                  if(matou == 1){
+                      minha_intencao.pos_x = -1;
+                      minha_intencao.pos_y = -1;
+
+                      matou = 0;
+
+                      sendMsgToServer(&minha_intencao,sizeof(msg_do_cliente));
+                  }
+
               }
          }
     }
+}
+
+char controla_raio_explosao(char matou){
+        for(k=0;k<max_clients;k++){
+            if(minha_intencao.pos_x +1 == basica.jogadores[k].posbomba_x && minha_intencao.pos_y == basica.jogadores[k].posbomba_y){ // jogador abaixo
+
+              matou = 1;
+
+          }else if(minha_intencao.pos_x -1 == basica.jogadores[k].posbomba_x && minha_intencao.pos_y == basica.jogadores[k].posbomba_y){ // jogador acima
+
+              matou = 1;
+
+          }else if(minha_intencao.pos_x == basica.jogadores[k].posbomba_x && minha_intencao.pos_y +1 == basica.jogadores[k].posbomba_y){// jogador a esquerda
+
+              matou = 1;
+
+          }else if(minha_intencao.pos_x == basica.jogadores[k].posbomba_x && minha_intencao.pos_y -1 == basica.jogadores[k].posbomba_y){ // jogador a direita
+
+              matou = 1;
+          }else
+                matou = 0;
+        }
+    return matou; //retorna 0 - nao morreu ou 1 - morreu
 }
