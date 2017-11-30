@@ -119,14 +119,14 @@ void main(){
             	printf("minha posicao eh %d - %d\n", minha_intencao.pos_x,minha_intencao.pos_y);
             	recvMsgFromServer(&basica,WAIT_FOR_IT);
 
-            	printa_matriz();
+            	printa_matriz(inicio_aux_Bomba);
             }
 
            	tamanho_msg_entregue = recvMsgFromServer(&basica,DONT_WAIT); //recebe mensagem
 
             if(tamanho_msg_entregue != NO_MESSAGE){ // a mensagem foi recebida!
             	system("clear"); //limpa o cmd
-                printa_matriz(); //com certeza nao printa a matriz(gerar humor,ele printa sim)
+                printa_matriz(inicio_aux_Bomba); //com certeza nao printa a matriz(gerar humor,ele printa sim)
             }
 
             contador_Bombas(inicio_aux_Bomba,inicio_Bomba,atual_Bomba); //ve se tem bomba
@@ -215,7 +215,7 @@ void tratar_intencao(char *controle){
 	}
 }
 
-void printa_matriz(int inicio_aux_Bomba){
+void printa_matriz(int inicio_aux_Bomba[]){
     for(i=0;i<tamanho_altura;i++){
         for(j=0;j<tamanho_largura;j++){
             verifica = 0;
