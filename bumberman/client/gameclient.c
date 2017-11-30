@@ -56,9 +56,12 @@ typedef struct p_broadcast{
 msg_do_cliente minha_intencao;
 msg_todos basica;
 
+int i,j,k; //contadores globais!!!
+int verifica=0; //tambem é global,referente a funcao printa_matriz
+
 void tratar_intencao(char *controle);
 int verifica_posix(int posix_x, int posix_y);
-void printa_matriz();
+void printa_matriz(int inicio_aux_Bomba[]);
 void contador_Bombas(int inicio_aux_Bomba[],time_t inicio_Bomba[],time_t atual_Bomba[]);
 
 void main(){
@@ -78,9 +81,8 @@ void main(){
 	char controle;
     int retorno = 0;
 
-    int i,j,k;
     int tamanho_msg_entregue = 0;
-    int verifica=0;
+
     int inicio_aux_Bomba[max_clients] = {0};
 
     time_t inicioConexao,atualConexao; //para garantir q ele continue conectando
@@ -213,7 +215,7 @@ void tratar_intencao(char *controle){
 	}
 }
 
-void printa_matriz(){
+void printa_matriz(int inicio_aux_Bomba){
     for(i=0;i<tamanho_altura;i++){
         for(j=0;j<tamanho_largura;j++){
             verifica = 0;
