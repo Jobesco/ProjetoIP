@@ -9,7 +9,6 @@
 #define verd_2 2
 #define marrom 3
 #define quebra 4
-#define player 5
 
 char posicao[2] = {""};
 
@@ -68,7 +67,7 @@ void main(){
 
 	char *IP;
 
-	IP = (char*)calloc(50,sizeof(char));
+	IP = (char *)calloc(50,sizeof(char));
 
 	if(IP==NULL){
 		printf("ERRO NA ALOCACAO\n");
