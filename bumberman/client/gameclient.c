@@ -7,8 +7,8 @@
 #define pedra 0
 #define verd_1 1
 #define verd_2 2
-#define marrom 3
-#define quebra 4
+#define marrom 3 //um muro mais escuro
+#define quebra 4 //objetos quebraveis
 
 char posicao[2] = {""};
 
@@ -16,12 +16,12 @@ char posicao[2] = {""};
 char matriz[tamanho_altura][tamanho_largura] = {
 
     {pedra,pedra,pedra,pedra,pedra,pedra,pedra,pedra,pedra,pedra,pedra,pedra},
-    {pedra,verd_1,verd_1,verd_1,verd_2,verd_1,verd_1,verd_1,verd_1,verd_1,verd_2,pedra},
-    {pedra,verd_2,verd_1,verd_1,verd_1,verd_2,verd_1,verd_2,verd_1,verd_1,verd_1,pedra},
-    {pedra,verd_1,verd_1,verd_1,verd_2,verd_1,verd_1,verd_1,verd_1,verd_1,verd_1,pedra},
-    {pedra,verd_1,verd_1,verd_2,verd_1,verd_2,verd_1,verd_1,verd_1,verd_1,verd_1,pedra},
-    {pedra,verd_1,verd_2,verd_1,verd_1,verd_1,verd_1,verd_1,verd_1,verd_1,verd_1,pedra},
-    {pedra,verd_1,verd_1,verd_1,verd_1,verd_1,verd_1,verd_1,verd_1,verd_2,verd_1,pedra},
+    {pedra,verd_1,pedra,verd_1,quebra,pedra,verd_1,verd_1,pedra,verd_1,verd_2,pedra},
+    {pedra,verd_2,pedra,verd_1,pedra,verd_2,verd_1,pedra,verd_1,verd_1,verd_1,pedra},
+    {pedra,verd_1,pedra,verd_1,verd_2,pedra,quebra,pedra,quebra,verd_1,verd_1,pedra},
+    {pedra,quebra,quebra,verd_2,verd_1,pedra,verd_1,pedra,quebra,quebra,quebra,pedra},
+    {pedra,verd_1,verd_2,pedra,quebra,verd_1,verd_1,verd_1,quebra,verd_1,verd_1,pedra},
+    {pedra,verd_1,verd_1,verd_1,verd_1,pedra,pedra,verd_1,quebra,verd_2,verd_1,pedra},
     {pedra,pedra,pedra,pedra,pedra,pedra,pedra,pedra,pedra,pedra,pedra,pedra}
 
 };
@@ -54,14 +54,15 @@ typedef struct p_broadcast{
 
 msg_do_cliente minha_intencao;
 msg_todos basica;
+time_t inicioJogo,atualJogo;
 
 int verifica=0; //tambem é global,referente a funcao printa_matriz
 
-void tratar_intencao(char *controle,int inicio_aux_Bomba[]);
+void tratar_intencao(char *controle,int inicio_aux_Bomba[],char *possoBombar);
 int verifica_posix(int posix_x, int posix_y,int inicio_aux_Bomba[]);
 void printa_matriz(int inicio_aux_Bomba[]);
-void contador_Bombas(int inicio_aux_Bomba[],time_t inicio_Bomba[],time_t atual_Bomba[]);
-char controla_raio_explosao(char matou);
+void contador_Bombas(int inicio_aux_Bomba[],time_t inicio_Bomba[],time_t atual_Bomba[],char *possoBombar);
+char controla_raio_explosao(char matou,int inicio_aux_Bomba[]);
 
 void main(){
 
@@ -84,6 +85,8 @@ void main(){
     int tamanho_msg_entregue = 0;
 
     int inicio_aux_Bomba[max_clients] = {0};
+
+    char possoBombar = 0;
 
     time_t inicioConexao,atualConexao; //para garantir q ele continue conectando
     time_t inicio_Bomba[max_clients],atual_Bomba[max_clients];
@@ -120,19 +123,23 @@ void main(){
             	recvMsgFromServer(&basica,WAIT_FOR_IT);
 
             	printa_matriz(inicio_aux_Bomba);
+
+                inicioJogo = time(NULL); //inicia o timer do jogo
+            }
+
+            if(difftime(atualJogo = time(NULL),inicioJogo) >= 240){ //referente ao tempo de cada partida
+                desconectado = 0;
             }
 
            	tamanho_msg_entregue = recvMsgFromServer(&basica,DONT_WAIT); //recebe mensagem
 
             if(tamanho_msg_entregue != NO_MESSAGE){ // a mensagem foi recebida!
-            	system("clear"); //limpa o cmd
                 printa_matriz(inicio_aux_Bomba); //com certeza nao printa a matriz(gerar humor,ele printa sim)
             }
 
             controle = getch(); //recebe um valor em char que indica a tecla apertada,retorna NO_KEY_PRESSED se ele nao apertou tecla alguma
-            tratar_intencao(&controle,inicio_aux_Bomba); //verifica se ele pode executar o movimento antes mesmo de enviar para o servidor,assim,o servidor executa menos tarefas
-
-            contador_Bombas(inicio_aux_Bomba,inicio_Bomba,atual_Bomba); //ve se tem bomba
+            tratar_intencao(&controle,inicio_aux_Bomba,&possoBombar); //verifica se ele pode executar o movimento antes mesmo de enviar para o servidor,assim,o servidor executa menos tarefas
+            contador_Bombas(inicio_aux_Bomba,inicio_Bomba,atual_Bomba,&possoBombar); //ve se tem bomba
 
             if(controle != NO_KEY_PRESSED){ //se ele apertou uma tecla
             	if(controle != 'K'){ //se ele nao apertou K,ele tentou se mover(verificado antes por tratar_intencao)
@@ -168,6 +175,7 @@ void main(){
 }
 
 int verifica_posix(int posix_x, int posix_y,int inicio_aux_Bomba[]){ //posix diz onde eu quero estar
+
     int i;
         for(i=0;i<max_clients;i++){
             if(inicio_aux_Bomba[i] != 0){ //se essa bomba estiver rodando
@@ -180,11 +188,11 @@ int verifica_posix(int posix_x, int posix_y,int inicio_aux_Bomba[]){ //posix diz
         }else{
             return 0;
         }
-
 }
 
-void tratar_intencao(char *controle,int inicio_aux_Bomba[]){
-	if(controle[0]>96){
+void tratar_intencao(char *controle,int inicio_aux_Bomba[],char *possoBombar){
+
+  if(controle[0]>96){
 		controle[0] -= 32;
 	}
 
@@ -217,13 +225,18 @@ void tratar_intencao(char *controle,int inicio_aux_Bomba[]){
             	controle[0] = NO_KEY_PRESSED;
             break;
 		case 'K': //caso seja uma bomba,ela vai ter a posicao do jogador
-			minha_intencao.bomba = 1;
-			break;
-	}
+            if(possoBombar[0] == 0){ //se ele n tiver nenhuma bomba no mapa ja
+			         minha_intencao.bomba = 1;
+               possoBombar[0] = 1;
+            }
+            break;
+	 }
 }
 
-void printa_matriz(int inicio_aux_Bomba[]){
+void printa_matriz(int inicio_aux_Bomba[]){ //por hora,em printa matriz,ele so atualiza o relogio se o cara se movimentar,cabe a glr de allegro colocar um timer independente e funcional
+    system("clear"); //limpa o cmd
     int i,j,k;
+    printf("%.0lf\n",240 - difftime(atualJogo,inicioJogo));
 
     for(i=0;i<tamanho_altura;i++){
         for(j=0;j<tamanho_largura;j++){
@@ -240,6 +253,8 @@ void printa_matriz(int inicio_aux_Bomba[]){
             if(verifica==0){ //se ele n printou ngm,ele printa a matriz
                 if(matriz[i][j] == 1 || matriz[i][j] == 2)
                     printf("0");
+                else if(matriz[i][j] == quebra)
+                    printf("Q");
                 else
                     printf("N");
             }
@@ -247,36 +262,38 @@ void printa_matriz(int inicio_aux_Bomba[]){
     }
 }
 
-void contador_Bombas(int inicio_aux_Bomba[],time_t inicio_Bomba[],time_t atual_Bomba[]){
+void contador_Bombas(int inicio_aux_Bomba[],time_t inicio_Bomba[],time_t atual_Bomba[],char *possoBombar){
+
     int i;
     for(i=0;i<max_clients;i++){ //contador das bombas,atualmente independe de basica para continuar rodando,mas depende para inicializar(como deve ser)
 
           if(basica.jogadores[i].bomba == 1){ //se ele tiver recebido uma bomba
               inicio_aux_Bomba[i] = 1; // 0 -- ninguem botou bomba // 1 -- alguem botou bomba
               inicio_Bomba[i] = time(NULL); //inicializa o contador
+              basica.jogadores[i].bomba = 0; // impede a reinicializacao do timer da bomba!
+
           }
           if(inicio_aux_Bomba[i] != 0){ //ou seja,ele tiver um contador iniciado
-              atual_Bomba[i] = time(NULL);
-              if(difftime(atual_Bomba[i],inicio_Bomba[i]) >= 3){ //a bomba explode!
-                  inicio_aux_Bomba[i] = 0;
-                  printf("BOOM\n");
 
-                  char matou;
-                  matou = controla_raio_explosao(matou);
-                  if(matou == 1){
-                      minha_intencao.pos_x = -1;
-                      minha_intencao.pos_y = -1;
-
-                      matou = 0;
-                      sendMsgToServer(&minha_intencao,sizeof(msg_do_cliente));
-                  }
-
-              }
-         }
-    }
+                atual_Bomba[i] = time(NULL);
+                if(difftime(atual_Bomba[i],inicio_Bomba[i]) >= 3){ //a bomba explode!
+                    possoBombar[0] = 0; //reseta a condicao de usar bomba,podendo novamente soltar uma bomba
+                    char matou;
+                    matou = controla_raio_explosao(matou,inicio_aux_Bomba);
+                    if(matou == 1){
+                        minha_intencao.pos_x = -1;
+                        minha_intencao.pos_y = -1;
+                        matou = 0;
+                        sendMsgToServer(&minha_intencao,sizeof(msg_do_cliente));
+                    }
+                    inicio_aux_Bomba[i] = 0; //prepara para receber outra bomba
+                    printf("BOOM\n");
+               }
+          }
+     }
 }
 
-char controla_raio_explosao(char matou){
+char controla_raio_explosao(char matou,int inicio_aux_Bomba[]){ //
     int k;
         for(k=0;k<max_clients;k++){
             if(minha_intencao.pos_x == basica.jogadores[k].posbomba_x +1 && minha_intencao.pos_y == basica.jogadores[k].posbomba_y){ // jogador abaixo
@@ -297,6 +314,28 @@ char controla_raio_explosao(char matou){
           }else if(minha_intencao.pos_x == basica.jogadores[k].posbomba_x && minha_intencao.pos_y == basica.jogadores[k].posbomba_y){
 
               matou = 1;
+          }
+
+          if(matriz[basica.jogadores[k].posbomba_x+1][basica.jogadores[k].posbomba_y] == quebra){
+
+              matriz[basica.jogadores[k].posbomba_x+1][basica.jogadores[k].posbomba_y] = verd_1;
+              printa_matriz(inicio_aux_Bomba);
+
+          }else if(matriz[basica.jogadores[k].posbomba_x-1][basica.jogadores[k].posbomba_y] == quebra){
+
+              matriz[basica.jogadores[k].posbomba_x-1][basica.jogadores[k].posbomba_y] = verd_1;
+              printa_matriz(inicio_aux_Bomba);
+
+          }else if(matriz[basica.jogadores[k].posbomba_x][basica.jogadores[k].posbomba_y+1] == quebra){
+
+              matriz[basica.jogadores[k].posbomba_x][basica.jogadores[k].posbomba_y+1] = verd_1;
+              printa_matriz(inicio_aux_Bomba);
+
+          }else if(matriz[basica.jogadores[k].posbomba_x][basica.jogadores[k].posbomba_y-1] == quebra){
+
+              matriz[basica.jogadores[k].posbomba_x][basica.jogadores[k].posbomba_y-1] = verd_1;
+              printa_matriz(inicio_aux_Bomba);
+
           }
       }
     return matou; //retorna 0 - nao morreu ou 1 - morreu
