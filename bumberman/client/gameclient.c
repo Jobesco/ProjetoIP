@@ -170,27 +170,6 @@ void main(){
     }
 }
 
-void controla_raio_explosao(char id){ // busca por jogadores proximos ao raio de explosao
-
-    if(basica.jogadores[id].pos_x+1 == basica.jogadores[id].posbomba_x && basica.jogadores[id].pos_y == basica.jogadores[id].posbomba_y){ // jogador abaixo
-
-      retorno = basica.jogadores[id].id; // retorna o id do jogador
-
-    }else if(basica.jogadores[id].pos_x-1 == basica.jogadores[id].posbomba_x && basica.jogadores[id].pos_y == basica.jogadores[id].posbomba_y){ // jogador acima
-
-      retorno = basica.jogadores[id].id;
-
-    }else if(basica.jogadores[id].pos_x == basica.jogadores[id].posbomba_x && basica.jogadores[id].pos_y+1 == basica.jogadores[id].posbomba_y){// jogador a esquerda
-
-      retorno = basica.jogadores[id].id;
-
-    }else if(basica.jogadores[id].pos_x == basica.jogadores[id].posbomba_x && basica.jogadores[id].pos_y-1 == basica.jogadores[id].posbomba_y){ // jogador a direita
-
-      retorno = basica.jogadores[id].id;
-    }else
-        retorno = 0;
-}
-
 int verifica_posix(int posix_x, int posix_y){
 
     if(matriz[posix_x][posix_y] == 1 || matriz[posix_x][posix_y] == 2){
@@ -287,4 +266,25 @@ void contador_Bombas(int inicio_aux_Bomba[],time_t inicio_Bomba[],time_t atual_B
               }
           }
     }
+}
+
+void controla_raio_explosao(char id){ // busca por jogadores proximos ao raio de explosao
+
+    if(basica.jogadores[id].pos_x+1 == basica.jogadores[id].posbomba_x && basica.jogadores[id].pos_y == basica.jogadores[id].posbomba_y){ // jogador abaixo
+
+      retorno = basica.jogadores[id].id; // retorna o id do jogador
+
+    }else if(basica.jogadores[id].pos_x-1 == basica.jogadores[id].posbomba_x && basica.jogadores[id].pos_y == basica.jogadores[id].posbomba_y){ // jogador acima
+
+      retorno = basica.jogadores[id].id;
+
+    }else if(basica.jogadores[id].pos_x == basica.jogadores[id].posbomba_x && basica.jogadores[id].pos_y+1 == basica.jogadores[id].posbomba_y){// jogador a esquerda
+
+      retorno = basica.jogadores[id].id;
+
+    }else if(basica.jogadores[id].pos_x == basica.jogadores[id].posbomba_x && basica.jogadores[id].pos_y-1 == basica.jogadores[id].posbomba_y){ // jogador a direita
+
+      retorno = basica.jogadores[id].id;
+    }else
+        retorno = 0;
 }
