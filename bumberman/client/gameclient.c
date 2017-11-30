@@ -9,7 +9,6 @@
 #define verd_2 2
 #define marrom 3
 #define quebra 4
-#define player 5
 
 char posicao[2] = {""};
 
@@ -56,19 +55,19 @@ typedef struct p_broadcast{
 msg_do_cliente minha_intencao;
 msg_todos basica;
 
-int i,j,k; //contadores globais!!!
 int verifica=0; //tambem é global,referente a funcao printa_matriz
 
-void tratar_intencao(char *controle);
-int verifica_posix(int posix_x, int posix_y);
+void tratar_intencao(char *controle,int inicio_aux_Bomba[]);
+int verifica_posix(int posix_x, int posix_y,int inicio_aux_Bomba[]);
 void printa_matriz(int inicio_aux_Bomba[]);
 void contador_Bombas(int inicio_aux_Bomba[],time_t inicio_Bomba[],time_t atual_Bomba[]);
+char controla_raio_explosao(char matou);
 
 void main(){
 
 	char *IP;
 
-	IP = (char*)calloc(50,sizeof(char));
+	IP = (char *)calloc(50,sizeof(char));
 
 	if(IP==NULL){
 		printf("ERRO NA ALOCACAO\n");
@@ -80,6 +79,7 @@ void main(){
 	int aux = 0,auxBomba = 0;
 	char controle;
     int retorno = 0;
+    int i,j,k; //estou desglobalizando os contadores,apenas para manter um funcionamento mais saudavel das funcoes
 
     int tamanho_msg_entregue = 0;
 
@@ -129,10 +129,10 @@ void main(){
                 printa_matriz(inicio_aux_Bomba); //com certeza nao printa a matriz(gerar humor,ele printa sim)
             }
 
-            contador_Bombas(inicio_aux_Bomba,inicio_Bomba,atual_Bomba); //ve se tem bomba
-
             controle = getch(); //recebe um valor em char que indica a tecla apertada,retorna NO_KEY_PRESSED se ele nao apertou tecla alguma
-            tratar_intencao(&controle); //verifica se ele pode executar o movimento antes mesmo de enviar para o servidor,assim,o servidor executa menos tarefas
+            tratar_intencao(&controle,inicio_aux_Bomba); //verifica se ele pode executar o movimento antes mesmo de enviar para o servidor,assim,o servidor executa menos tarefas
+
+            contador_Bombas(inicio_aux_Bomba,inicio_Bomba,atual_Bomba); //ve se tem bomba
 
             if(controle != NO_KEY_PRESSED){ //se ele apertou uma tecla
             	if(controle != 'K'){ //se ele nao apertou K,ele tentou se mover(verificado antes por tratar_intencao)
@@ -167,44 +167,51 @@ void main(){
     }
 }
 
-int verifica_posix(int posix_x, int posix_y){
+int verifica_posix(int posix_x, int posix_y,int inicio_aux_Bomba[]){ //posix diz onde eu quero estar
+    int i;
+        for(i=0;i<max_clients;i++){
+            if(inicio_aux_Bomba[i] != 0){ //se essa bomba estiver rodando
+                if(posix_x == basica.jogadores[i].posbomba_x && posix_y == basica.jogadores[i].posbomba_y) //se tiver uma bomba onde ele quer ir,ele nao pode ir.
+                    return 0;
+            }
+        }
+        if(matriz[posix_x][posix_y] == 1 || matriz[posix_x][posix_y] == 2){
+            return 1;
+        }else{
+            return 0;
+        }
 
-    if(matriz[posix_x][posix_y] == 1 || matriz[posix_x][posix_y] == 2){
-        return 1;
-    }else{
-        return 0;
-    }
 }
 
-void tratar_intencao(char *controle){
+void tratar_intencao(char *controle,int inicio_aux_Bomba[]){
 	if(controle[0]>96){
 		controle[0] -= 32;
 	}
 
 	switch(controle[0]){
 		case 'W':
-            if(verifica_posix(minha_intencao.pos_x-1, minha_intencao.pos_y) == 1){
+            if(verifica_posix(minha_intencao.pos_x-1, minha_intencao.pos_y,inicio_aux_Bomba) == 1){
                 minha_intencao.pos_x -= 1;
             }else
             	controle[0] = NO_KEY_PRESSED;
             break;
 
         case 'A':
-            if(verifica_posix(minha_intencao.pos_x, minha_intencao.pos_y-1) == 1){
+            if(verifica_posix(minha_intencao.pos_x, minha_intencao.pos_y-1,inicio_aux_Bomba) == 1){
                 minha_intencao.pos_y -= 1;
             }else
             	controle[0] = NO_KEY_PRESSED;
             break;
 
         case 'S':
-            if(verifica_posix(minha_intencao.pos_x+1, minha_intencao.pos_y) == 1){
+            if(verifica_posix(minha_intencao.pos_x+1, minha_intencao.pos_y,inicio_aux_Bomba) == 1){
                 minha_intencao.pos_x += 1;
             }else
             	controle[0] = NO_KEY_PRESSED;
             break;
 
         case 'D':
-            if(verifica_posix(minha_intencao.pos_x, minha_intencao.pos_y+1) == 1){
+            if(verifica_posix(minha_intencao.pos_x, minha_intencao.pos_y+1,inicio_aux_Bomba) == 1){
                 minha_intencao.pos_y += 1;
             }else
             	controle[0] = NO_KEY_PRESSED;
@@ -216,6 +223,8 @@ void tratar_intencao(char *controle){
 }
 
 void printa_matriz(int inicio_aux_Bomba[]){
+    int i,j,k;
+
     for(i=0;i<tamanho_altura;i++){
         for(j=0;j<tamanho_largura;j++){
             verifica = 0;
@@ -239,7 +248,7 @@ void printa_matriz(int inicio_aux_Bomba[]){
 }
 
 void contador_Bombas(int inicio_aux_Bomba[],time_t inicio_Bomba[],time_t atual_Bomba[]){
-
+    int i;
     for(i=0;i<max_clients;i++){ //contador das bombas,atualmente independe de basica para continuar rodando,mas depende para inicializar(como deve ser)
 
           if(basica.jogadores[i].bomba == 1){ //se ele tiver recebido uma bomba
@@ -251,7 +260,44 @@ void contador_Bombas(int inicio_aux_Bomba[],time_t inicio_Bomba[],time_t atual_B
               if(difftime(atual_Bomba[i],inicio_Bomba[i]) >= 3){ //a bomba explode!
                   inicio_aux_Bomba[i] = 0;
                   printf("BOOM\n");
+
+                  char matou;
+                  matou = controla_raio_explosao(matou);
+                  if(matou == 1){
+                      minha_intencao.pos_x = -1;
+                      minha_intencao.pos_y = -1;
+
+                      matou = 0;
+                      sendMsgToServer(&minha_intencao,sizeof(msg_do_cliente));
+                  }
+
               }
-          }
+         }
     }
+}
+
+char controla_raio_explosao(char matou){
+    int k;
+        for(k=0;k<max_clients;k++){
+            if(minha_intencao.pos_x == basica.jogadores[k].posbomba_x +1 && minha_intencao.pos_y == basica.jogadores[k].posbomba_y){ // jogador abaixo
+
+              matou = 1;
+
+          }else if(minha_intencao.pos_x == basica.jogadores[k].posbomba_x -1 && minha_intencao.pos_y == basica.jogadores[k].posbomba_y){ // jogador acima
+
+              matou = 1;
+
+          }else if(minha_intencao.pos_x == basica.jogadores[k].posbomba_x && minha_intencao.pos_y == basica.jogadores[k].posbomba_y +1){// jogador a esquerda
+
+              matou = 1;
+
+          }else if(minha_intencao.pos_x == basica.jogadores[k].posbomba_x && minha_intencao.pos_y == basica.jogadores[k].posbomba_y -1){ // jogador a direita
+
+              matou = 1;
+          }else if(minha_intencao.pos_x == basica.jogadores[k].posbomba_x && minha_intencao.pos_y == basica.jogadores[k].posbomba_y){
+
+              matou = 1;
+          }
+      }
+    return matou; //retorna 0 - nao morreu ou 1 - morreu
 }
