@@ -59,12 +59,13 @@ msg_todos basica;
 
 int i,j,k; //contadores globais!!!
 int verifica=0; //tambem é global,referente a funcao printa_matriz
+int retorno = 0;
 
 void tratar_intencao(char *controle);
 int verifica_posix(int posix_x, int posix_y);
 void printa_matriz(int inicio_aux_Bomba[]);
 void contador_Bombas(int inicio_aux_Bomba[],time_t inicio_Bomba[],time_t atual_Bomba[]);
-int controla_raio_explosao(basica jogador_1,int retorno);
+void controla_raio_explosao(char id);
 
 void main(){
 
@@ -169,28 +170,25 @@ void main(){
     }
 }
 
-int controla_raio_explosao(basica jogador_1,int retorno){ // busca por jogadores proximos ao raio de explosao
+void controla_raio_explosao(char id){ // busca por jogadores proximos ao raio de explosao
 
-    if(jogador_1.posix_x+1 == jogador_1.posbomba_x && jogador_1.posix_y == jogador_1.posbomba_y){ // jogador na esquerda
+    if(basica.jogadores[id].pos_x+1 == basica.jogadores[id].posbomba_x && basica.jogadores[id].pos_y == basica.jogadores[id].posbomba_y){ // jogador abaixo
 
-      retorno = jogador_1.id; // retorna o id do jogador
+      retorno = basica.jogadores[id].id; // retorna o id do jogador
 
-    }else if(jogador_1.posix_x-1 == jogador_1.posbomba_x && jogador_1.posix_y == jogador_1.posbomba_y){ // jogador na direita
+    }else if(basica.jogadores[id].pos_x-1 == basica.jogadores[id].posbomba_x && basica.jogadores[id].pos_y == basica.jogadores[id].posbomba_y){ // jogador acima
 
-      retorno = jogador_1.id;
+      retorno = basica.jogadores[id].id;
 
-    }else if(jogador_1.posix_x == jogador_1.posbomba_x && jogador_1.posix_y+1 == jogador_1.posbomba_y){// jogador em baixo
+    }else if(basica.jogadores[id].pos_x == basica.jogadores[id].posbomba_x && basica.jogadores[id].pos_y+1 == basica.jogadores[id].posbomba_y){// jogador a esquerda
 
-      retorno = jogador_1.id;
+      retorno = basica.jogadores[id].id;
 
-    }else if(jogador_1.posix_x == jogador_1.posbomba_x && jogador_1.posix_y-1 == jogador_1.posbomba_y){ // jogador em cima
+    }else if(basica.jogadores[id].pos_x == basica.jogadores[id].posbomba_x && basica.jogadores[id].pos_y-1 == basica.jogadores[id].posbomba_y){ // jogador a direita
 
-      retorno = jogador_1.id;
-
-    }
-
-  return retorno;
-
+      retorno = basica.jogadores[id].id;
+    }else
+        retorno = 0;
 }
 
 int verifica_posix(int posix_x, int posix_y){
@@ -275,14 +273,13 @@ void contador_Bombas(int inicio_aux_Bomba[],time_t inicio_Bomba[],time_t atual_B
           if(inicio_aux_Bomba[i] != 0){ //ou seja,ele tiver um contador iniciado
               atual_Bomba[i] = time(NULL);
               if(difftime(atual_Bomba[i],inicio_Bomba[i]) >= 3){ //a bomba explode!
-                  int retorno = 0;
                   for(j=0;j<max_clients;j++){ // percorre cada jogador verificando se ele está no range de explosao
-                    retorno = controla_raio_explosao(basica.jogadores[i],retorno);// verifica os arredores da explosao
-                    //a variavel retono armazena o id do jogador que morreu
-                    if(retorno != 0){// o jogador está no range de explosao
+                    //controla_raio_explosao(j);// verifica os arredores da explosao,passa j pq j representa o ID do jogador
+
+                    if(retorno != 0){ // o jogador está no range de explosao // a variavel retono armazena o id do jogador que morreu
                       // atribui um valor fora do campo existente, impedindo que o jogador volte ao jogo
-                      basica.jogadores[j].posix_x = -1;
-                      basica.jogadores[j].posix_y = -1;
+                      basica.jogadores[j].pos_x = -1;
+                      basica.jogadores[j].pos_y = -1;
                     }
                   }
                   inicio_aux_Bomba[i] = 0;
