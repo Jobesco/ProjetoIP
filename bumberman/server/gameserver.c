@@ -92,12 +92,9 @@ void main(){
         		tratar_broadcast(i); //vai tratar e enviar a struct basica de acordo com a mensagem que ele recebeu(zero parametros pois a struct eh global)
         	}
         	if(confirmacao_cliente.status == DISCONNECT_MSG){
-        		basica.jogadores[i].pos_x = -1; //se ele estiveer na posicao -1,ele nao ira printa-lo
+        		basica.jogadores[i].pos_x = -1; //se ele estiver na posicao -1,ele nao ira printa-lo
         		basica.jogadores[i].pos_y = -1;
         	}
-            if(basica.jogadores[i].pos_x == -1){ //debugger
-                printf("jogador %d morreu\n",id[i]);
-            }
         }
     }
 }
