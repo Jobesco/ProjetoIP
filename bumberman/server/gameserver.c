@@ -60,7 +60,7 @@ void main(){
 
 	    int i; //contador padrao
 
-	    while(1){ //loop referente ao jogo
+	    while(verificaOnline < 4){ //loop referente ao jogo,que sai quando verificaOnline for igual a 4
 
 		    if(aux==0){ //loop que so eh executado uma vez no jogo inteiro(no comeco)
 				aux++;
@@ -81,15 +81,13 @@ void main(){
 
 	        		tratar_broadcast(i); //vai tratar e enviar a struct basica de acordo com a mensagem que ele recebeu(zero parametros pois a struct eh global)
 	        	}
+
 				verificaOnline = 0;
 	        	if(confirmacao_cliente.status == DISCONNECT_MSG){
 	        		basica.jogadores[i].pos_x = -1; //se ele estiver na posicao -1,ele nao ira printa-lo
 	        		basica.jogadores[i].pos_y = -1;
 					verificaOnline++;
 	        	}
-				if(verificaOnline >= 4){//todos sairam,esta na hora de iniciar um novo jogo!
-
-				}
 	        }
 	    }
 	}
