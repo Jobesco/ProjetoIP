@@ -252,6 +252,6 @@ void contador_Bombas(int inicio_aux_Bomba[],time_t inicio_Bomba[],time_t atual_B
                   inicio_aux_Bomba[i] = 0;
                   printf("BOOM\n");
               }
-          }
+         }
     }
 }
