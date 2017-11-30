@@ -38,7 +38,7 @@ typedef struct{
 	char pos_x;
 	char pos_y;
 
-	char bomba;
+	char bomba; //representa A INTENCAO DE BOMBA,nao a existencia dela em si,a existencia eh tratada individualmente no client
 	char posbomba_x;
 	char posbomba_y;
 
@@ -71,14 +71,13 @@ void main(){
 
     while(1){ //loop referente ao jogo
 
-	    if(aux==0){
+	    if(aux==0){ //loop que so eh executado uma vez no jogo inteiro(no comeco)
 			aux++;
-			for(i=0;i<4;i++){
+			for(i=0;i<4;i++){ //loop referente a enviar a cada jogador sua atual posicao
 				recebe_do_cliente[i].pos_x = basica.jogadores[i].pos_x;
 				recebe_do_cliente[i].pos_y = basica.jogadores[i].pos_y;
 
 				printf("passando a posicao %d - %d para jogador %d\n",basica.jogadores[i].pos_x,basica.jogadores[i].pos_y,id[i]);
-
 				sendMsgToClient(&recebe_do_cliente[i],sizeof(msg_do_cliente),id[i]); //a principio,manda a localizacao de cada jogador para que ele saiba quem ele é em sua intencao de movimento.
 			}
 		broadcast(&basica,sizeof(msg_todos)); //manda para todos a matriz toda
@@ -87,14 +86,15 @@ void main(){
     	for(i=0;i<4;i++){ //loop referente a receber e tratar mensagem
     		recebe_cliente =  recvMsgFromClient(&recebe_do_cliente[i],basica.jogadores[i].id,DONT_WAIT); //OBS: recebe_cliente -> struct q indica o status da mensagem recebida ~~ recebe_do_cliente -> struct msg_do_cliente com sua intencao de movimento ou bomba.
 
-    		if(recebe_cliente.status == MESSAGE_OK){
+    		if(recebe_cliente.status == MESSAGE_OK){ //se ele recebeu uma mensagem
+
         		if(recebe_do_cliente[i].bomba == 1){ //ou o server recebe uma bomba,ou uma movimentacao
-        			basica.jogadores[i].bomba = 1;
+        			basica.jogadores[i].bomba = 1; //atribui a intencao de bomba e sua posicao,em baixo do jogador
         			basica.jogadores[i].posbomba_x = basica.jogadores[i].pos_x;
         			basica.jogadores[i].posbomba_y = basica.jogadores[i].pos_y;
 
         			broadcast(&basica,sizeof(msg_todos));
-        			//basica.jogadores[i].bomba = 0; //nao existe mais bomba p servidor tratar,ele ja mandou para todos a informacao necessaria.
+        			basica.jogadores[i].bomba = 0; //nao existe mais bomba p servidor tratar,ele ja mandou para todos a informacao necessaria.
         		}else{
               		basica.jogadores[i].pos_x = recebe_do_cliente[i].pos_x; //altera a posicao dele em broadcast(como ele printa a matriz e depois o jogador de acordo com a localizacao,eu nao preciso alterar nada na matriz,pq nada eh alterado nela)
               		basica.jogadores[i].pos_y = recebe_do_cliente[i].pos_y;
