@@ -151,7 +151,6 @@ void main(){
             	}
             }
 
-
             if(retorno == SERVER_DISCONNECTED){
 	        	desconectado = 1;
 	        }
@@ -272,27 +271,33 @@ void contador_Bombas(int inicio_aux_Bomba[],time_t inicio_Bomba[],time_t atual_B
           if(basica.jogadores[i].bomba == 1){ //se ele tiver recebido uma bomba
               inicio_aux_Bomba[i] = 1; // 0 -- ninguem botou bomba // 1 -- alguem botou bomba
               inicio_Bomba[i] = time(NULL); //inicializa o contador
+              basica.jogadores[i].bomba = 0;
+
           }
           if(inicio_aux_Bomba[i] != 0){ //ou seja,ele tiver um contador iniciado
-              atual_Bomba[i] = time(NULL);
-              if(difftime(atual_Bomba[i],inicio_Bomba[i]) >= 3){ //a bomba explode!
-                  inicio_aux_Bomba[i] = 0;
-                  printf("BOOM\n");
-                  possoBombar[0] = 0; //reseta a condicao de usar bomba,podendo novamente soltar uma bomba
 
-                  char matou;
-                  matou = controla_raio_explosao(matou);
-                  if(matou == 1){
-                      minha_intencao.pos_x = -1;
-                      minha_intencao.pos_y = -1;
+                atual_Bomba[i] = time(NULL);
+                if(difftime(atual_Bomba[i],inicio_Bomba[i]) >= 3){ //a bomba explode!
+                    inicio_aux_Bomba[i] = 0;
+                    printf("BOOM\n");
+                    possoBombar[0] = 0; //reseta a condicao de usar bomba,podendo novamente soltar uma bomba
 
-                      matou = 0;
-                      sendMsgToServer(&minha_intencao,sizeof(msg_do_cliente));
-                  }
+                    char matou;
+                    matou = controla_raio_explosao(matou);
+                    if(matou == 1){
+                        minha_intencao.pos_x = -1;
+                        minha_intencao.pos_y = -1;
+
+                        matou = 0;
+                        sendMsgToServer(&minha_intencao,sizeof(msg_do_cliente));
+                    }
 
               }
+
          }
+
     }
+
 }
 
 char controla_raio_explosao(char matou){

@@ -129,8 +129,6 @@ void tratar_broadcast(int i){
         basica.jogadores[i].posbomba_x = basica.jogadores[i].pos_x;
         basica.jogadores[i].posbomba_y = basica.jogadores[i].pos_y;
 
-		printf("jogador %d jogou uma bomba\n",i);
-
         broadcast(&basica,sizeof(msg_todos));
         basica.jogadores[i].bomba = 0; //nao existe mais intencao de bomba
     }else{
