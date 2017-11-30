@@ -40,50 +40,59 @@ typedef struct p_broadcast{
 msg_todos basica; //essa eh a mensagem basica para todos a ser enviada.
 struct msg_ret_t confirmacao_cliente;
 msg_do_cliente recebe_do_cliente[4];
+char verificaOnline = 0; //se for igual a 4,ele reseta e vai pro comeco novamente ;)
 
 void iniciar_jogo();
 void estabelecer_conexao();
 void tratar_broadcast(int i); //trata e envia a struct basica
 
 void main(){
-
 	serverInit(max_clients); // inicia_server
-    int aux = 0;
-    printf("server is running...\n");
-  	estabelecer_conexao();
-  	printf("conexoes estabelecidas\n");
+	int aux;
 
-    iniciar_jogo();
+	while(1){ //loop referente ao menu
+	    aux = 0;
+	    printf("server is running...\n");
+	  	estabelecer_conexao();
+	  	printf("conexoes estabelecidas\n");
 
-    int i; //contador padrao
+	    iniciar_jogo();
 
-    while(1){ //loop referente ao jogo
+	    int i; //contador padrao
 
-	    if(aux==0){ //loop que so eh executado uma vez no jogo inteiro(no comeco)
-			aux++;
-			for(i=0;i<4;i++){ //loop referente a enviar a cada jogador sua atual posicao
-				recebe_do_cliente[i].pos_x = basica.jogadores[i].pos_x;
-				recebe_do_cliente[i].pos_y = basica.jogadores[i].pos_y;
+	    while(1){ //loop referente ao jogo
 
-				printf("passando a posicao %d - %d para jogador %d\n",basica.jogadores[i].pos_x,basica.jogadores[i].pos_y,id[i]);
-				sendMsgToClient(&recebe_do_cliente[i],sizeof(msg_do_cliente),id[i]); //a principio,manda a localizacao de cada jogador para que ele saiba quem ele é em sua intencao de movimento.
+		    if(aux==0){ //loop que so eh executado uma vez no jogo inteiro(no comeco)
+				aux++;
+				for(i=0;i<4;i++){ //loop referente a enviar a cada jogador sua atual posicao
+					recebe_do_cliente[i].pos_x = basica.jogadores[i].pos_x;
+					recebe_do_cliente[i].pos_y = basica.jogadores[i].pos_y;
+
+					printf("passando a posicao %d - %d para jogador %d\n",basica.jogadores[i].pos_x,basica.jogadores[i].pos_y,id[i]);
+					sendMsgToClient(&recebe_do_cliente[i],sizeof(msg_do_cliente),id[i]); //a principio,manda a localizacao de cada jogador para que ele saiba quem ele é em sua intencao de movimento.
+				}
+			broadcast(&basica,sizeof(msg_todos)); //manda para todos a matriz toda
 			}
-		broadcast(&basica,sizeof(msg_todos)); //manda para todos a matriz toda
-		}
 
-    	for(i=0;i<4;i++){ //loop referente a receber e tratar mensagem
-    		confirmacao_cliente =  recvMsgFromClient(&recebe_do_cliente[i],basica.jogadores[i].id,DONT_WAIT); //OBS: confirmacao_cliente -> struct q indica o status da mensagem recebida ~~ recebe_do_cliente -> struct msg_do_cliente com sua intencao de movimento ou bomba.
+	    	for(i=0;i<4;i++){ //loop referente a receber e tratar mensagem,entre outros
+	    		confirmacao_cliente =  recvMsgFromClient(&recebe_do_cliente[i],basica.jogadores[i].id,DONT_WAIT); //OBS: confirmacao_cliente -> struct q indica o status da mensagem recebida ~~ recebe_do_cliente -> struct msg_do_cliente com sua intencao de movimento ou bomba.
 
-    		if(confirmacao_cliente.status == MESSAGE_OK){ //se ele recebeu uma mensagem
+	    		if(confirmacao_cliente.status == MESSAGE_OK){ //se ele recebeu uma mensagem
 
-        		tratar_broadcast(i); //vai tratar e enviar a struct basica de acordo com a mensagem que ele recebeu(zero parametros pois a struct eh global)
-        	}
-        	if(confirmacao_cliente.status == DISCONNECT_MSG){
-        		basica.jogadores[i].pos_x = -1; //se ele estiver na posicao -1,ele nao ira printa-lo
-        		basica.jogadores[i].pos_y = -1;
-        	}
-        }
-    }
+	        		tratar_broadcast(i); //vai tratar e enviar a struct basica de acordo com a mensagem que ele recebeu(zero parametros pois a struct eh global)
+	        	}
+				verificaOnline = 0;
+	        	if(confirmacao_cliente.status == DISCONNECT_MSG){
+	        		basica.jogadores[i].pos_x = -1; //se ele estiver na posicao -1,ele nao ira printa-lo
+	        		basica.jogadores[i].pos_y = -1;
+					verificaOnline++;
+	        	}
+				if(verificaOnline >= 4){//todos sairam,esta na hora de iniciar um novo jogo!
+
+				}
+	        }
+	    }
+	}
 }
 
 void estabelecer_conexao(){
