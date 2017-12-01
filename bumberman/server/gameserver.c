@@ -131,16 +131,16 @@ void iniciar_jogo(){
     basica.jogadores[0].pos_y = 1; //coluna
 
     basica.jogadores[1].id = 1;
-    basica.jogadores[1].pos_x = 6;
-    basica.jogadores[1].pos_y = 1;
+    basica.jogadores[1].pos_x = 1;
+    basica.jogadores[1].pos_y = 25;
 
     basica.jogadores[2].id = 2;
-    basica.jogadores[2].pos_x = 1;
-    basica.jogadores[2].pos_y = 10;
+    basica.jogadores[2].pos_x = 20;
+    basica.jogadores[2].pos_y = 1;
 
     basica.jogadores[3].id = 3;
-    basica.jogadores[3].pos_x = 6;
-    basica.jogadores[3].pos_y = 10;
+    basica.jogadores[3].pos_x = 20;
+    basica.jogadores[3].pos_y = 25;
 }
 
 void tratar_broadcast(int i){

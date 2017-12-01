@@ -2,8 +2,8 @@
 #include "default.h"
 #include "comum.h"
 #define max_clients 4
-#define tamanho_altura 8
-#define tamanho_largura 12
+#define tamanho_altura 22
+#define tamanho_largura 27
 #define pedra 0
 #define verd_1 1
 #define verd_2 2
@@ -11,6 +11,34 @@
 #define quebra 4 //objetos quebraveis
 
 char posicao[2] = {""};
+
+
+char matriz[tamanho_altura][tamanho_largura] = {
+
+    {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0},
+    {0,1,2,1,2,4,0,1,2,4,4,0,0,4,2,1,2,1,0,4,0,1,4,1,2,1,0},
+    {0,2,1,0,1,4,4,4,4,2,1,4,4,4,1,2,4,2,1,4,1,2,4,2,4,2,0},
+    {0,1,0,1,0,4,2,4,2,1,2,1,2,4,4,4,2,4,2,4,4,1,4,4,4,0,0},
+    {0,4,4,2,4,0,1,2,0,2,1,2,1,2,1,2,1,2,1,2,1,0,4,0,4,4,0},
+    {0,1,2,4,2,1,4,1,4,1,2,1,4,1,4,0,0,1,2,1,2,1,2,1,2,1,0},
+    {0,0,0,4,4,4,4,4,1,2,4,2,1,2,4,2,0,4,1,4,1,2,1,4,4,4,0},
+    {0,0,0,4,4,4,4,4,2,1,2,1,2,1,4,1,0,1,2,1,2,1,2,1,2,1,0},
+    {0,2,1,2,1,0,1,4,1,2,0,2,1,2,4,4,0,2,4,2,0,4,1,4,1,2,0},
+    {0,1,2,1,2,0,2,1,2,1,2,1,4,4,0,1,2,1,2,1,2,4,4,4,4,4,0},
+    {0,4,1,2,1,2,1,0,0,2,4,2,1,2,0,2,4,2,1,2,4,2,1,4,4,4,0},
+    {0,1,4,4,2,1,2,1,2,4,4,4,2,4,0,1,2,1,0,1,2,1,2,4,2,1,0},
+    {0,2,1,2,4,2,1,2,1,2,1,2,1,2,0,2,4,4,4,4,4,0,1,2,1,2,0},
+    {0,1,2,1,4,0,0,4,4,1,2,4,4,4,4,1,2,1,2,4,4,4,2,1,2,1,0},
+    {0,4,1,2,4,2,1,2,1,0,0,4,0,2,4,4,1,2,1,4,0,4,4,4,4,4,0},
+    {0,4,0,0,4,4,4,0,4,4,2,1,2,1,2,1,2,0,2,1,0,1,2,1,2,1,0},
+    {0,2,1,2,1,2,1,2,1,2,1,4,1,2,1,2,1,2,1,2,1,2,1,0,1,2,0},
+    {0,1,2,1,2,0,0,0,2,1,2,1,2,1,2,1,2,4,2,4,4,0,2,1,0,0,0},
+    {0,2,0,4,4,4,4,2,1,2,0,2,1,4,4,4,0,4,1,2,1,2,4,4,1,2,0},
+    {0,1,2,1,0,4,2,0,2,4,4,4,4,4,4,4,2,1,4,4,4,4,2,0,2,1,0},
+    {0,2,1,2,1,4,4,2,1,2,1,4,1,2,1,2,1,2,1,2,1,0,1,2,1,2,0},
+    {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0},
+
+};
 
 typedef struct historico{
 
@@ -20,19 +48,6 @@ typedef struct historico{
   double win_ratio; // partidas ganhas / partidas jogadas
 
 }historico;
-
-char matriz[tamanho_altura][tamanho_largura] = {
-
-    {pedra,pedra,pedra,pedra,pedra,pedra,pedra,pedra,pedra,pedra,pedra,pedra},
-    {pedra,verd_1,pedra,verd_1,quebra,pedra,verd_1,verd_1,pedra,verd_1,verd_2,pedra},
-    {pedra,verd_2,pedra,verd_1,pedra,verd_2,verd_1,pedra,verd_1,verd_1,verd_1,pedra},
-    {pedra,verd_1,pedra,verd_1,verd_2,pedra,quebra,pedra,quebra,verd_1,verd_1,pedra},
-    {pedra,quebra,quebra,verd_2,verd_1,pedra,verd_1,pedra,quebra,quebra,quebra,pedra},
-    {pedra,verd_1,verd_2,pedra,quebra,verd_1,verd_1,verd_1,quebra,verd_1,verd_1,pedra},
-    {pedra,verd_1,verd_1,verd_1,verd_1,pedra,pedra,verd_1,quebra,verd_2,verd_1,pedra},
-    {pedra,pedra,pedra,pedra,pedra,pedra,pedra,pedra,pedra,pedra,pedra,pedra}
-
-};
 
 typedef struct{
   char id;
