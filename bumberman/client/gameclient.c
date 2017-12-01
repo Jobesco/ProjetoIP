@@ -64,7 +64,7 @@ char quemGanhou = 0;
 msg_do_cliente minha_intencao;
 msg_todos basica;
 time_t inicioJogo,atualJogo;
-int verifica=0; //tambem é global,referente a funcao printa_matriz
+int verifica = 0; //tambem é global,referente a funcao printa_matriz
 historico hist; // declara struct do tipo historico
 historico para_ler;
 int n_bombas = 0;
@@ -106,7 +106,7 @@ void main(){
     char possoBombar = 0;
     time_t inicioConexao,atualConexao; //para garantir q ele continue conectando
     time_t inicio_Bomba[max_clients],atual_Bomba[max_clients];
-    char respostaJogo = 1;
+    int respostaJogo = 1;
 
     while(respostaJogo == 1){
     	while(1){
@@ -130,6 +130,10 @@ void main(){
             n_bombas = 0;
             desconectado = 0;
             aux = 0;
+            tamanho_msg_entregue = 0;
+            possoBombar = 0;
+            quemGanhou = 0;
+            verifica = 0;
         }
 
     	while(desconectado != 1){ // verifica se o client ainda joga
@@ -173,7 +177,7 @@ void main(){
               if(verifica_fim_jogo() == 1){
                   desconectado = 1;
                   printf("Deseja Jogar novamente?\n0 - Nao\n1 - Sim");
-                  scanf("%c",&respostaJogo);
+                  scanf(" %d",&respostaJogo);
               } // autoexplicativo
 
             }else if(estado == SERVER_DOWN){ //nao achou o server
