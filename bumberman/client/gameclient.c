@@ -98,7 +98,6 @@ ALLEGRO_BITMAP *player = NULL;
 ALLEGRO_BITMAP *background = NULL;
 ALLEGRO_FONT *fonte = NULL;
 ALLEGRO_EVENT_QUEUE *fila_eventos = NULL;
-ALLEGRO_EVENT evento;
 //ALLEGRO_TIMEOUT timeout;
 // ALLEGRO_AUDIO_STREAM *musica = NULL;
 // ALLEGRO_SAMPLE *sample = NULL;
@@ -202,25 +201,26 @@ void main(){
                 if(tamanho_msg_entregue != NO_MESSAGE){ // a mensagem foi recebida!
                     printa_matriz(inicio_aux_Bomba); //com certeza nao printa a matriz(gerar humor,ele printa sim)
                 }
-                while (!sair) {
-                  al_wait_for_event(fila_eventos, &evento);
+                while (!al_is_event_queue_empty(fila_eventos)) {
+                  ALLEGRO_EVENT evento;
+                  al_get_next_event(fila_eventos, &evento);
+                  //al_wait_for_event(fila_eventos, &evento);
                   //al_wait_for_event_until(fila_eventos, &evento, &timeout);
-                  if (evento.type == ALLEGRO_EVENT_KEY_UP) {
+                  if (evento.type == ALLEGRO_EVENT_KEY_DOWN) {
                       switch(evento.keyboard.keycode) {
-                      case ALLEGRO_KEY_W : controle = 'W'; sair = true;
+                      case ALLEGRO_KEY_W : controle = 'W';
                           break;
-                      case ALLEGRO_KEY_S: controle = 'S'; sair = true;
+                      case ALLEGRO_KEY_S: controle = 'S';
                           break;
-                      case ALLEGRO_KEY_A: controle = 'A'; sair = true;
+                      case ALLEGRO_KEY_A: controle = 'A';
                           break;
-                      case ALLEGRO_KEY_D: controle = 'D'; sair = true;
+                      case ALLEGRO_KEY_D: controle = 'D';
                           break;
-                      case ALLEGRO_KEY_K: controle = 'K'; sair = true;
+                      case ALLEGRO_KEY_K: controle = 'K';
                           break;
                       }
                   }
                   else if (evento.type == ALLEGRO_EVENT_DISPLAY_CLOSE) {
-                      sair = true;
                       destroy();
                       return 0;
                   }
