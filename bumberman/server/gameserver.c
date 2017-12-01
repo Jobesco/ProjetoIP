@@ -116,6 +116,7 @@ void estabelecer_conexao(){
         	if(n_conexoes < max_clients){ // if redundante p evitar resto do while
                 id[n_conexoes] = id_temp;
                 n_conexoes++;
+				printf("jogador %d conectado\n",id[n_conexoes]);
             }else{
             	rejectConnection();
         	}

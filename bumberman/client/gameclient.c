@@ -178,6 +178,9 @@ void main(){
                   desconectado = 1;
                   printf("Deseja Jogar novamente?\n0 - Nao\n1 - Sim\n");
                   scanf(" %d",&respostaJogo);
+                  if(respostaJogo == 1)
+                    printf("Infelizmente a biblioteca q usamos nao permite que ele reconecte sem recompilar,hehe\nPor favor,reinicie o cliente para poder jogar novamente!\n");
+                respostaJogo = 0;
               } // autoexplicativo
 
             }else if(estado == SERVER_DOWN){ //nao achou o server
@@ -340,7 +343,7 @@ void printa_matriz(int inicio_aux_Bomba[]){ //por hora,em printa matriz,ele so a
     for(i=0;i<tamanho_altura;i++){
         for(j=0;j<tamanho_largura;j++){
             verifica = 0;
-            for(k=0;k<4;k++){
+            for(k=0;k<max_clients;k++){
                 if(basica.jogadores[k].pos_x == i && basica.jogadores[k].pos_y == j){
                     printf("%d",basica.jogadores[k].id+1); // valor p simbolizar o jogador
                     verifica++;
