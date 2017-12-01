@@ -396,6 +396,7 @@ void contador_Bombas(int inicio_aux_Bomba[],time_t inicio_Bomba[],time_t atual_B
 
 char controla_raio_explosao(char matou,int inicio_aux_Bomba[]){ //
     int k;
+    int verificou = 0;
         for(k=0;k<max_clients;k++){
             if(minha_intencao.pos_x == basica.jogadores[k].posbomba_x +1 && minha_intencao.pos_y == basica.jogadores[k].posbomba_y){ // jogador abaixo
 
@@ -420,24 +421,29 @@ char controla_raio_explosao(char matou,int inicio_aux_Bomba[]){ //
           if(matriz[basica.jogadores[k].posbomba_x+1][basica.jogadores[k].posbomba_y] == quebra){
 
               matriz[basica.jogadores[k].posbomba_x+1][basica.jogadores[k].posbomba_y] = verd_1;
-              printa_matriz(inicio_aux_Bomba);
+              verificou = 1;
 
-          }else if(matriz[basica.jogadores[k].posbomba_x-1][basica.jogadores[k].posbomba_y] == quebra){
+          }
+          if(matriz[basica.jogadores[k].posbomba_x-1][basica.jogadores[k].posbomba_y] == quebra){
 
               matriz[basica.jogadores[k].posbomba_x-1][basica.jogadores[k].posbomba_y] = verd_1;
-              printa_matriz(inicio_aux_Bomba);
+              verificou = 1;
 
-          }else if(matriz[basica.jogadores[k].posbomba_x][basica.jogadores[k].posbomba_y+1] == quebra){
+          }
+          if(matriz[basica.jogadores[k].posbomba_x][basica.jogadores[k].posbomba_y+1] == quebra){
 
               matriz[basica.jogadores[k].posbomba_x][basica.jogadores[k].posbomba_y+1] = verd_1;
-              printa_matriz(inicio_aux_Bomba);
+              verificou = 1;
 
-          }else if(matriz[basica.jogadores[k].posbomba_x][basica.jogadores[k].posbomba_y-1] == quebra){
+          }
+          if(matriz[basica.jogadores[k].posbomba_x][basica.jogadores[k].posbomba_y-1] == quebra){
 
               matriz[basica.jogadores[k].posbomba_x][basica.jogadores[k].posbomba_y-1] = verd_1;
-              printa_matriz(inicio_aux_Bomba);
+              verificou = 1;
 
           }
       }
+    if(verificou != 0)
+        printa_matriz(inicio_aux_Bomba);
     return matou; //retorna 0 - nao morreu ou 1 - morreu
 }
