@@ -222,11 +222,11 @@ void main(){
                       default : controle = NO_KEY_PRESSED;
                       }
                   }
-                  // else if (evento.type == ALLEGRO_EVENT_DISPLAY_CLOSE) {
-                  //     destroy();
-                  //     sair = true;
-                  //     return 0;
-                  // }
+                  else if (evento.type == ALLEGRO_EVENT_DISPLAY_CLOSE) {
+                      destroy();
+                      sair = true;
+                      return 0;
+                  }
                 }
                 //al_wait_for_event(fila_eventos, &evento);
                 //controle = getch(); //recebe um valor em char que indica a tecla apertada,retorna NO_KEY_PRESSED se ele nao apertou tecla alguma
