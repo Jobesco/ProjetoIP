@@ -201,6 +201,7 @@ void main(){
                 if(tamanho_msg_entregue != NO_MESSAGE){ // a mensagem foi recebida!
                     printa_matriz(inicio_aux_Bomba); //com certeza nao printa a matriz(gerar humor,ele printa sim)
                 }
+                controle = NO_KEY_PRESSED;
                 while (!al_is_event_queue_empty(fila_eventos)) {
                   ALLEGRO_EVENT evento;
                   al_get_next_event(fila_eventos, &evento);
@@ -218,18 +219,20 @@ void main(){
                           break;
                       case ALLEGRO_KEY_K: controle = 'K';
                           break;
+                      default : controle = NO_KEY_PRESSED;
                       }
                   }
-                  else if (evento.type == ALLEGRO_EVENT_DISPLAY_CLOSE) {
-                      destroy();
-                      return 0;
-                  }
+                  // else if (evento.type == ALLEGRO_EVENT_DISPLAY_CLOSE) {
+                  //     destroy();
+                  //     sair = true;
+                  //     return 0;
+                  // }
                 }
-                sair = false;
+                //al_wait_for_event(fila_eventos, &evento);
                 //controle = getch(); //recebe um valor em char que indica a tecla apertada,retorna NO_KEY_PRESSED se ele nao apertou tecla alguma
                 tratar_intencao(&controle,inicio_aux_Bomba,&possoBombar); //verifica se ele pode executar o movimento antes mesmo de enviar para o servidor,assim,o servidor executa menos tarefas
-                contador_Bombas(inicio_aux_Bomba,inicio_Bomba,atual_Bomba,&possoBombar); //ve se tem bomba
 
+                contador_Bombas(inicio_aux_Bomba,inicio_Bomba,atual_Bomba,&possoBombar); //ve se tem bomba
                 if(controle != NO_KEY_PRESSED){ //se ele apertou uma tecla
                 	if(controle != 'K'){ //se ele nao apertou K,ele tentou se mover(verificado antes por tratar_intencao)
     	            	retorno = sendMsgToServer(&minha_intencao,sizeof(msg_do_cliente)); // manda a intencao de bomba
