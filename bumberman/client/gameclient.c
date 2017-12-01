@@ -36,7 +36,7 @@ char matriz[tamanho_altura][tamanho_largura] = {
     {0,2,0,4,4,4,4,2,1,2,0,2,1,4,4,4,0,4,1,2,1,2,4,4,1,2,0},
     {0,1,2,1,0,4,2,0,2,4,4,4,4,4,4,4,2,1,4,4,4,4,2,0,2,1,0},
     {0,2,1,2,1,4,4,2,1,2,1,4,1,2,1,2,1,2,1,2,1,0,1,2,1,2,0},
-    {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0}
+    {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0},
 
 };
 
@@ -79,7 +79,7 @@ char quemGanhou = 0;
 msg_do_cliente minha_intencao;
 msg_todos basica;
 time_t inicioJogo,atualJogo;
-int verifica=0; //tambem é global,referente a funcao printa_matriz
+int verifica = 0; //tambem é global,referente a funcao printa_matriz
 historico hist; // declara struct do tipo historico
 historico para_ler;
 int n_bombas = 0;
@@ -111,8 +111,8 @@ void main(){
 	}
 
 	int estado;
-	int desconectado = 0;
-	int aux = 0,auxBomba = 0;
+	int desconectado;
+	int aux = 0;
 	char controle;
     int retorno = 0;
     int i,j,k; //estou desglobalizando os contadores,apenas para manter um funcionamento mais saudavel das funcoes
@@ -121,84 +121,100 @@ void main(){
     char possoBombar = 0;
     time_t inicioConexao,atualConexao; //para garantir q ele continue conectando
     time_t inicio_Bomba[max_clients],atual_Bomba[max_clients];
+    int respostaJogo = 1;
 
-	while(1){
+    while(respostaJogo == 1){
+    	while(1){
 
-		printf("Digite o IP onde deseja se conectar\n");
+    		printf("Digite o IP onde deseja se conectar\n");
 
-		scanf(" %s",IP);
-		printf("Iremos logar ao IP %s\n", IP);
+    		scanf(" %s",IP);
+    		printf("Iremos logar ao IP %s\n", IP);
 
-		inicioConexao = time(NULL);
-		atualConexao = time(NULL);
-		printf("Por favor aguarde!\n");
+    		inicioConexao = time(NULL);
+    		atualConexao = time(NULL);
+    		printf("Por favor aguarde!\n");
 
-		while(difftime(atualConexao,inicioConexao) < 2){
-			atualConexao = time(NULL);
-			estado = connectToServer(IP);
-			if(estado == SERVER_UP)
-				break;
-		}
-		break;
-        n_bombas = 0;
-    }
-
-	while(desconectado != 1){ // verifica se o client ainda joga
-
-        if(estado == SERVER_UP){ //conexao estabelecida // prosseguir
-            if(aux==0){
-            	aux++;
-            	printf("Conectado!\n");
-            	recvMsgFromServer(&minha_intencao,WAIT_FOR_IT); //vai receber sua posicao e armazenar em minha_intencao(que a partir da posicao dele,sera modificada conforme ele se movimenta)
-            	printf("minha posicao eh %d - %d\n", minha_intencao.pos_x,minha_intencao.pos_y);
-            	recvMsgFromServer(&basica,WAIT_FOR_IT);
-            	printa_matriz(inicio_aux_Bomba);
-              inicioJogo = time(NULL); //inicia o timer do jogo
-            }
-            if(difftime(atualJogo = time(NULL),inicioJogo) >= 240){ //referente ao tempo de cada partida
-                desconectado = 0;
-            }
-
-           	tamanho_msg_entregue = recvMsgFromServer(&basica,DONT_WAIT); //recebe mensagem
-
-            if(tamanho_msg_entregue != NO_MESSAGE){ // a mensagem foi recebida!
-                printa_matriz(inicio_aux_Bomba); //com certeza nao printa a matriz(gerar humor,ele printa sim)
-            }
-
-            controle = getch(); //recebe um valor em char que indica a tecla apertada,retorna NO_KEY_PRESSED se ele nao apertou tecla alguma
-            tratar_intencao(&controle,inicio_aux_Bomba,&possoBombar); //verifica se ele pode executar o movimento antes mesmo de enviar para o servidor,assim,o servidor executa menos tarefas
-            contador_Bombas(inicio_aux_Bomba,inicio_Bomba,atual_Bomba,&possoBombar); //ve se tem bomba
-
-            if(controle != NO_KEY_PRESSED){ //se ele apertou uma tecla
-            	if(controle != 'K'){ //se ele nao apertou K,ele tentou se mover(verificado antes por tratar_intencao)
-	            	retorno = sendMsgToServer(&minha_intencao,sizeof(msg_do_cliente)); // manda a intencao de bomba
-            	}else{
-            		retorno = sendMsgToServer(&minha_intencao,sizeof(msg_do_cliente)); //manda a intencao de movimento,mas a struct ja contem bomba e movimento,entao nao faz diferenca
-            		minha_intencao.bomba = 0; //reseta,pois ele nao tem mais INTENCAO de enviar uma bomba p server dar broadcast
-            	}
-            }
-            if(retorno == SERVER_DISCONNECTED){
-	        	desconectado = 1;
-	        }
-
-          if(verifica_fim_jogo() == 1){desconectado = 1; break;} // autoexplicativo
-
-        }else if(estado == SERVER_DOWN){ //nao achou o server
-
-            printf("Servidor nao encontrado :S\n");
+    		while(difftime(atualConexao,inicioConexao) < 3){
+    			atualConexao = time(NULL);
+    			estado = connectToServer(IP);
+    			if(estado == SERVER_UP)
+    				break;
+    		}
+            n_bombas = 0;
+            desconectado = 0;
+            aux = 0;
+            tamanho_msg_entregue = 0;
+            possoBombar = 0;
+            quemGanhou = 0;
+            verifica = 0;
             break;
-        }else if(estado == SERVER_FULL){ // cheio
+        }
 
-            printf("Servidor lotado!\nAguarde proxima partida :/\n");
-            break;
-        }else if(estado == SERVER_CLOSED){ // n aceita conexao
+    	while(desconectado != 1){ // verifica se o client ainda joga
 
-            printf("Servidor nao aceita novas conexoes! >:U\n");
-            break;
-        }else if(estado == SERVER_TIMEOUT){ // demorou p responder
+            if(estado == SERVER_UP){ //conexao estabelecida // prosseguir
+                if(aux==0){
+                	aux++;
+                	printf("Conectado!\n");
+                	recvMsgFromServer(&minha_intencao,WAIT_FOR_IT); //vai receber sua posicao e armazenar em minha_intencao(que a partir da posicao dele,sera modificada conforme ele se movimenta)
+                	printf("minha posicao eh %d - %d\n", minha_intencao.pos_x,minha_intencao.pos_y);
+                	recvMsgFromServer(&basica,WAIT_FOR_IT);
+                	printa_matriz(inicio_aux_Bomba);
+                  inicioJogo = time(NULL); //inicia o timer do jogo
+                }
+                if(difftime(atualJogo = time(NULL),inicioJogo) >= 240){ //referente ao tempo de cada partida
+                    desconectado = 0;
+                }
 
-            printf("Voce esperou demais, verifique sua conexao de dados! :P\n");
-            break;
+               	tamanho_msg_entregue = recvMsgFromServer(&basica,DONT_WAIT); //recebe mensagem
+
+                if(tamanho_msg_entregue != NO_MESSAGE){ // a mensagem foi recebida!
+                    printa_matriz(inicio_aux_Bomba); //com certeza nao printa a matriz(gerar humor,ele printa sim)
+                }
+
+                controle = getch(); //recebe um valor em char que indica a tecla apertada,retorna NO_KEY_PRESSED se ele nao apertou tecla alguma
+                tratar_intencao(&controle,inicio_aux_Bomba,&possoBombar); //verifica se ele pode executar o movimento antes mesmo de enviar para o servidor,assim,o servidor executa menos tarefas
+                contador_Bombas(inicio_aux_Bomba,inicio_Bomba,atual_Bomba,&possoBombar); //ve se tem bomba
+
+                if(controle != NO_KEY_PRESSED){ //se ele apertou uma tecla
+                	if(controle != 'K'){ //se ele nao apertou K,ele tentou se mover(verificado antes por tratar_intencao)
+    	            	retorno = sendMsgToServer(&minha_intencao,sizeof(msg_do_cliente)); // manda a intencao de bomba
+                	}else{
+                		retorno = sendMsgToServer(&minha_intencao,sizeof(msg_do_cliente)); //manda a intencao de movimento,mas a struct ja contem bomba e movimento,entao nao faz diferenca
+                		minha_intencao.bomba = 0; //reseta,pois ele nao tem mais INTENCAO de enviar uma bomba p server dar broadcast
+                	}
+                }
+                if(retorno == SERVER_DISCONNECTED){
+    	        	desconectado = 1;
+    	        }
+
+              if(verifica_fim_jogo() == 1){
+                  desconectado = 1;
+                  printf("Deseja Jogar novamente?\n0 - Nao\n1 - Sim\n");
+                  scanf(" %d",&respostaJogo);
+                  if(respostaJogo == 1)
+                    printf("Infelizmente a biblioteca q usamos nao permite que ele reconecte sem recompilar,hehe\nPor favor,reinicie o cliente para poder jogar novamente!\n");
+                respostaJogo = 0;
+              } // autoexplicativo
+
+            }else if(estado == SERVER_DOWN){ //nao achou o server
+
+                printf("Servidor nao encontrado :S\n");
+                break;
+            }else if(estado == SERVER_FULL){ // cheio
+
+                printf("Servidor lotado!\nAguarde proxima partida :/\n");
+                break;
+            }else if(estado == SERVER_CLOSED){ // n aceita conexao
+
+                printf("Servidor nao aceita novas conexoes! >:U\n");
+                break;
+            }else if(estado == SERVER_TIMEOUT){ // demorou p responder
+
+                printf("Voce esperou demais, verifique sua conexao de dados! :P\n");
+                break;
+            }
         }
     }
 }
@@ -214,7 +230,6 @@ int verifica_fim_jogo(){
     if(quemGanhou == max_clients-1){//quer dizer que o jogo acabou.
 
         if(minha_intencao.pos_x == -1){
-            printf("Voce perdeu!\n");
             alterar_historico(0); //se for 0,ele perdeu
             return 1;
         }else{
@@ -343,7 +358,7 @@ void printa_matriz(int inicio_aux_Bomba[]){ //por hora,em printa matriz,ele so a
     for(i=0;i<tamanho_altura;i++){
         for(j=0;j<tamanho_largura;j++){
             verifica = 0;
-            for(k=0;k<4;k++){
+            for(k=0;k<max_clients;k++){
                 if(basica.jogadores[k].pos_x == i && basica.jogadores[k].pos_y == j){
                     printf("%d",basica.jogadores[k].id+1); // valor p simbolizar o jogador
                     verifica++;
@@ -388,6 +403,7 @@ void contador_Bombas(int inicio_aux_Bomba[],time_t inicio_Bomba[],time_t atual_B
                         minha_intencao.pos_y = -1;
                         matou = 0;
                         sendMsgToServer(&minha_intencao,sizeof(msg_do_cliente));
+                        printf("Voce perdeu!\n");
                     }
                     inicio_aux_Bomba[i] = 0; //prepara para receber outra bomba
                     printf("BOOM\n");
@@ -398,6 +414,7 @@ void contador_Bombas(int inicio_aux_Bomba[],time_t inicio_Bomba[],time_t atual_B
 
 char controla_raio_explosao(char matou,int inicio_aux_Bomba[]){ //
     int k;
+    int verificou = 0;
         for(k=0;k<max_clients;k++){
             if(minha_intencao.pos_x == basica.jogadores[k].posbomba_x +1 && minha_intencao.pos_y == basica.jogadores[k].posbomba_y){ // jogador abaixo
 
@@ -422,24 +439,29 @@ char controla_raio_explosao(char matou,int inicio_aux_Bomba[]){ //
           if(matriz[basica.jogadores[k].posbomba_x+1][basica.jogadores[k].posbomba_y] == quebra){
 
               matriz[basica.jogadores[k].posbomba_x+1][basica.jogadores[k].posbomba_y] = verd_1;
-              printa_matriz(inicio_aux_Bomba);
+              verificou = 1;
 
-          }else if(matriz[basica.jogadores[k].posbomba_x-1][basica.jogadores[k].posbomba_y] == quebra){
+          }
+          if(matriz[basica.jogadores[k].posbomba_x-1][basica.jogadores[k].posbomba_y] == quebra){
 
               matriz[basica.jogadores[k].posbomba_x-1][basica.jogadores[k].posbomba_y] = verd_1;
-              printa_matriz(inicio_aux_Bomba);
+              verificou = 1;
 
-          }else if(matriz[basica.jogadores[k].posbomba_x][basica.jogadores[k].posbomba_y+1] == quebra){
+          }
+          if(matriz[basica.jogadores[k].posbomba_x][basica.jogadores[k].posbomba_y+1] == quebra){
 
               matriz[basica.jogadores[k].posbomba_x][basica.jogadores[k].posbomba_y+1] = verd_1;
-              printa_matriz(inicio_aux_Bomba);
+              verificou = 1;
 
-          }else if(matriz[basica.jogadores[k].posbomba_x][basica.jogadores[k].posbomba_y-1] == quebra){
+          }
+          if(matriz[basica.jogadores[k].posbomba_x][basica.jogadores[k].posbomba_y-1] == quebra){
 
               matriz[basica.jogadores[k].posbomba_x][basica.jogadores[k].posbomba_y-1] = verd_1;
-              printa_matriz(inicio_aux_Bomba);
+              verificou = 1;
 
           }
       }
+    if(verificou != 0)
+        printa_matriz(inicio_aux_Bomba);
     return matou; //retorna 0 - nao morreu ou 1 - morreu
 }

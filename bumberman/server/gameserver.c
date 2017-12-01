@@ -2,8 +2,8 @@
 #include "default.h"
 #include "comum.h"
 #define max_clients 4
-#define tamanho_altura 22
-#define tamanho_largura 27
+#define tamanho_altura 8
+#define tamanho_largura 12
 #define pedra 0
 #define verd_1 1
 #define verd_2 2
@@ -40,50 +40,69 @@ typedef struct p_broadcast{
 msg_todos basica; //essa eh a mensagem basica para todos a ser enviada.
 struct msg_ret_t confirmacao_cliente;
 msg_do_cliente recebe_do_cliente[4];
+char verificaOnline = 0; //se for igual a 4,ele reseta e vai pro comeco novamente ;)
+
 
 void iniciar_jogo();
 void estabelecer_conexao();
 void tratar_broadcast(int i); //trata e envia a struct basica
 
 void main(){
-
 	serverInit(max_clients); // inicia_server
-    int aux = 0;
-    printf("server is running...\n");
-  	estabelecer_conexao();
-  	printf("conexoes estabelecidas\n");
+	int aux;
 
-    iniciar_jogo();
+	while(1){ //loop referente ao menu
+		serverReset();
 
-    int i; //contador padrao
+	    aux = 0;
+	    printf("Server is running...\n");
+	  	estabelecer_conexao();
+	  	printf("Conexoes estabelecidas\n");
 
-    while(1){ //loop referente ao jogo
+	    iniciar_jogo();
 
-	    if(aux==0){ //loop que so eh executado uma vez no jogo inteiro(no comeco)
-			aux++;
-			for(i=0;i<4;i++){ //loop referente a enviar a cada jogador sua atual posicao
-				recebe_do_cliente[i].pos_x = basica.jogadores[i].pos_x;
-				recebe_do_cliente[i].pos_y = basica.jogadores[i].pos_y;
+	    int i; //contador padrao
+		verificaOnline = 0;
+	    while(verificaOnline < 4){ //loop referente ao jogo,que sai quando verificaOnline for igual a 4
 
-				printf("passando a posicao %d - %d para jogador %d\n",basica.jogadores[i].pos_x,basica.jogadores[i].pos_y,id[i]);
-				sendMsgToClient(&recebe_do_cliente[i],sizeof(msg_do_cliente),id[i]); //a principio,manda a localizacao de cada jogador para que ele saiba quem ele é em sua intencao de movimento.
+		    if(aux==0){ //loop que so eh executado uma vez no jogo inteiro(no comeco)
+				aux++;
+				for(i=0;i<4;i++){ //loop referente a enviar a cada jogador sua atual posicao
+					recebe_do_cliente[i].pos_x = basica.jogadores[i].pos_x;
+					recebe_do_cliente[i].pos_y = basica.jogadores[i].pos_y;
+
+					printf("passando a posicao %d - %d para jogador %d\n",basica.jogadores[i].pos_x,basica.jogadores[i].pos_y,id[i]);
+					sendMsgToClient(&recebe_do_cliente[i],sizeof(msg_do_cliente),id[i]); //a principio,manda a localizacao de cada jogador para que ele saiba quem ele é em sua intencao de movimento.
+				}
+			broadcast(&basica,sizeof(msg_todos)); //manda para todos a matriz toda
 			}
-		broadcast(&basica,sizeof(msg_todos)); //manda para todos a matriz toda
+
+			verificaOnline = 0;
+	    	for(i=0;i<4;i++){ //loop referente a receber e tratar mensagem,entre outros
+	    		confirmacao_cliente =  recvMsgFromClient(&recebe_do_cliente[i],basica.jogadores[i].id,DONT_WAIT); //OBS: confirmacao_cliente -> struct q indica o status da mensagem recebida ~~ recebe_do_cliente -> struct msg_do_cliente com sua intencao de movimento ou bomba.
+
+	    		if(confirmacao_cliente.status == MESSAGE_OK){ //se ele recebeu uma mensagem
+
+	        		tratar_broadcast(i); //vai tratar e enviar a struct basica de acordo com a mensagem que ele recebeu(zero parametros pois a struct eh global)
+	        	}
+
+	        	if(confirmacao_cliente.status == DISCONNECT_MSG){
+	        		basica.jogadores[i].pos_x = -1; //se ele estiver na posicao -1,ele nao ira printa-lo
+	        		basica.jogadores[i].pos_y = -1;
+					disconnectClient(id[i]); //pelo visto,eh necessaria pra poder setar novos players
+					verificaOnline++;
+	        	}
+
+				if(basica.jogadores[i].pos_x == -1){ //se ele tiver morrido/desconectado
+					verificaOnline++;
+				}
+	        }
+	    }
+		for(i=0;i<max_clients;i++){
+			disconnectClient(id[i]);
+			printf("desconectei %d\n",i );
 		}
-
-    	for(i=0;i<4;i++){ //loop referente a receber e tratar mensagem
-    		confirmacao_cliente =  recvMsgFromClient(&recebe_do_cliente[i],basica.jogadores[i].id,DONT_WAIT); //OBS: confirmacao_cliente -> struct q indica o status da mensagem recebida ~~ recebe_do_cliente -> struct msg_do_cliente com sua intencao de movimento ou bomba.
-
-    		if(confirmacao_cliente.status == MESSAGE_OK){ //se ele recebeu uma mensagem
-
-        		tratar_broadcast(i); //vai tratar e enviar a struct basica de acordo com a mensagem que ele recebeu(zero parametros pois a struct eh global)
-        	}
-        	if(confirmacao_cliente.status == DISCONNECT_MSG){
-        		basica.jogadores[i].pos_x = -1; //se ele estiver na posicao -1,ele nao ira printa-lo
-        		basica.jogadores[i].pos_y = -1;
-        	}
-        }
-    }
+	}
 }
 
 void estabelecer_conexao(){
@@ -97,6 +116,7 @@ void estabelecer_conexao(){
         	if(n_conexoes < max_clients){ // if redundante p evitar resto do while
                 id[n_conexoes] = id_temp;
                 n_conexoes++;
+				printf("jogador %d conectado\n",id[n_conexoes]);
             }else{
             	rejectConnection();
         	}
@@ -111,16 +131,16 @@ void iniciar_jogo(){
     basica.jogadores[0].pos_y = 1; //coluna
 
     basica.jogadores[1].id = 1;
-    basica.jogadores[1].pos_x = 25;
-    basica.jogadores[1].pos_y = 1;
+    basica.jogadores[1].pos_x = 1;
+    basica.jogadores[1].pos_y = 25;
 
     basica.jogadores[2].id = 2;
-    basica.jogadores[2].pos_x = 1;
-    basica.jogadores[2].pos_y = 20;
+    basica.jogadores[2].pos_x = 20;
+    basica.jogadores[2].pos_y = 1;
 
     basica.jogadores[3].id = 3;
-    basica.jogadores[3].pos_x = 25;
-    basica.jogadores[3].pos_y = 20;
+    basica.jogadores[3].pos_x = 20;
+    basica.jogadores[3].pos_y = 25;
 }
 
 void tratar_broadcast(int i){
