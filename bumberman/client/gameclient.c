@@ -120,13 +120,12 @@ void main(){
     		atualConexao = time(NULL);
     		printf("Por favor aguarde!\n");
 
-    		while(difftime(atualConexao,inicioConexao) < 2){
+    		while(difftime(atualConexao,inicioConexao) < 3){
     			atualConexao = time(NULL);
     			estado = connectToServer(IP);
     			if(estado == SERVER_UP)
     				break;
     		}
-    		break;
             n_bombas = 0;
             desconectado = 0;
             aux = 0;
@@ -134,6 +133,7 @@ void main(){
             possoBombar = 0;
             quemGanhou = 0;
             verifica = 0;
+            break;
         }
 
     	while(desconectado != 1){ // verifica se o client ainda joga
@@ -176,7 +176,7 @@ void main(){
 
               if(verifica_fim_jogo() == 1){
                   desconectado = 1;
-                  printf("Deseja Jogar novamente?\n0 - Nao\n1 - Sim");
+                  printf("Deseja Jogar novamente?\n0 - Nao\n1 - Sim\n");
                   scanf(" %d",&respostaJogo);
               } // autoexplicativo
 

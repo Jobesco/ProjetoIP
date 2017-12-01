@@ -42,6 +42,7 @@ struct msg_ret_t confirmacao_cliente;
 msg_do_cliente recebe_do_cliente[4];
 char verificaOnline = 0; //se for igual a 4,ele reseta e vai pro comeco novamente ;)
 
+
 void iniciar_jogo();
 void estabelecer_conexao();
 void tratar_broadcast(int i); //trata e envia a struct basica
@@ -51,15 +52,17 @@ void main(){
 	int aux;
 
 	while(1){ //loop referente ao menu
+		serverReset();
+
 	    aux = 0;
-	    printf("server is running...\n");
+	    printf("Server is running...\n");
 	  	estabelecer_conexao();
-	  	printf("conexoes estabelecidas\n");
+	  	printf("Conexoes estabelecidas\n");
 
 	    iniciar_jogo();
 
 	    int i; //contador padrao
-
+		verificaOnline = 0;
 	    while(verificaOnline < 4){ //loop referente ao jogo,que sai quando verificaOnline for igual a 4
 
 		    if(aux==0){ //loop que so eh executado uma vez no jogo inteiro(no comeco)
@@ -74,6 +77,7 @@ void main(){
 			broadcast(&basica,sizeof(msg_todos)); //manda para todos a matriz toda
 			}
 
+			verificaOnline = 0;
 	    	for(i=0;i<4;i++){ //loop referente a receber e tratar mensagem,entre outros
 	    		confirmacao_cliente =  recvMsgFromClient(&recebe_do_cliente[i],basica.jogadores[i].id,DONT_WAIT); //OBS: confirmacao_cliente -> struct q indica o status da mensagem recebida ~~ recebe_do_cliente -> struct msg_do_cliente com sua intencao de movimento ou bomba.
 
@@ -82,14 +86,22 @@ void main(){
 	        		tratar_broadcast(i); //vai tratar e enviar a struct basica de acordo com a mensagem que ele recebeu(zero parametros pois a struct eh global)
 	        	}
 
-				verificaOnline = 0;
 	        	if(confirmacao_cliente.status == DISCONNECT_MSG){
 	        		basica.jogadores[i].pos_x = -1; //se ele estiver na posicao -1,ele nao ira printa-lo
 	        		basica.jogadores[i].pos_y = -1;
+					disconnectClient(id[i]); //pelo visto,eh necessaria pra poder setar novos players
 					verificaOnline++;
 	        	}
+
+				if(basica.jogadores[i].pos_x == -1){ //se ele tiver morrido/desconectado
+					verificaOnline++;
+				}
 	        }
 	    }
+		for(i=0;i<max_clients;i++){
+			disconnectClient(id[i]);
+			printf("desconectei %d\n",i );
+		}
 	}
 }
 
