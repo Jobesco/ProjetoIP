@@ -112,6 +112,7 @@ ALLEGRO_BITMAP *verde_1 = NULL;
 ALLEGRO_BITMAP *verde_2 = NULL;
 ALLEGRO_BITMAP *bomb = NULL;
 ALLEGRO_BITMAP *sprites = NULL;
+ALLEGRO_BITMAP *explosion = NULL;
 ALLEGRO_BITMAP *background = NULL;
 ALLEGRO_FONT *fonte = NULL;
 ALLEGRO_EVENT_QUEUE *fila_eventos = NULL;
@@ -120,6 +121,7 @@ ALLEGRO_EVENT_QUEUE *fila_eventos = NULL;
 // ALLEGRO_SAMPLE *sample = NULL;
 bool sair = false;
 char anterior[4] = {'S','S','S','S'};
+int tmp_bomb = 0; // variavel pra printar qdo a bomba explodir
 //fim das variaveis globais
 
 
@@ -458,7 +460,13 @@ void printa_matriz(int inicio_aux_Bomba[]){ //por hora,em printa matriz,ele so a
                 }
                 else if(inicio_aux_Bomba[k] == 1 && basica.jogadores[k].posbomba_x == i && basica.jogadores[k].posbomba_y == j){ //caso tenha uma bomba no mapa
                     printf("b"); //printa a bomba(mas o jogador vai em cima,caso esteja no mesmo bloco,por hora)
-                    al_draw_bitmap(bomb, m, l, 0);
+                    if (tmp_bomb) {
+                      al_draw_bitmap(explosion, m-37, l-37, 0);
+                      tmp_bomb = 0;
+                    }
+                    else {
+                      al_draw_bitmap(bomb, m, l, 0);
+                    }
                     verifica++;
                 }
             }
@@ -515,6 +523,7 @@ void contador_Bombas(int inicio_aux_Bomba[],time_t inicio_Bomba[],time_t atual_B
                     }
                     inicio_aux_Bomba[i] = 0; //prepara para receber outra bomba
                     printf("BOOM\n");
+                    tmp_bomb = 1;
                     printa_matriz(inicio_aux_Bomba);
                }
           }
@@ -680,9 +689,16 @@ bool inicializar () {
       al_destroy_event_queue(fila_eventos);
       return false;
   }
-  sprites = al_load_bitmap("sprites.jpeg");
+  sprites = al_load_bitmap("sprites.png");
   if (!sprites) {
       puts("Falha ao carregar imagem do sprites.\n");
+      al_destroy_display(janela);
+      al_destroy_event_queue(fila_eventos);
+      return false;
+  }
+  explosion = al_load_bitmap("explosion.png");
+  if (!explosion) {
+      puts("Falha ao carregar imagem do explosion.\n");
       al_destroy_display(janela);
       al_destroy_event_queue(fila_eventos);
       return false;
