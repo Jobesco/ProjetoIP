@@ -446,13 +446,13 @@ void printa_matriz(int inicio_aux_Bomba[]){ //por hora,em printa matriz,ele so a
                     printf("%d",basica.jogadores[k].id+1); // valor p simbolizar o jogador
                     //al_draw_bitmap(sprites, m, l, 0);
                     switch (anterior[k]) { // printar a sprite de acordo com o jogador
-                      case 'W': al_draw_bitmap_region(sprites,111,0,37,37,m,l,0);
+                      case 'W': al_draw_bitmap_region(sprites,111,37*k,37,37,m,l,0);
                       break;
-                      case 'A': al_draw_bitmap_region(sprites,0,0,37,37,m,l,0);
+                      case 'A': al_draw_bitmap_region(sprites,0,37*k,37,37,m,l,0);
                       break;
-                      case 'S': al_draw_bitmap_region(sprites,74,0,37,37,m,l,0);
+                      case 'S': al_draw_bitmap_region(sprites,74,37*k,37,37,m,l,0);
                       break;
-                      case 'D': al_draw_bitmap_region(sprites,37,0,37,37,m,l,0);
+                      case 'D': al_draw_bitmap_region(sprites,37,37*k,37,37,m,l,0);
                       break;
                     }
                     //al_draw_bitmap_region(sprites,0,0,37,37,m,l,0);
