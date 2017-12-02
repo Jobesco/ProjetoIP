@@ -77,7 +77,24 @@ typedef struct p_broadcast{
 
 } msg_todos;
 
+typedef struct mov_anterior{
+    char id;
+    char pos_ant_x;
+    char pos_ant_y;
+
+    /*
+    hora de entender as logicas
+    digamos que temos uma matriz de 3,e temos um jogador no meio,ou seja,(1,1) [x,y]
+    se ele apertou W,cima: (0,1) [x-1,y]
+    se ele apertou A,esquerda: (1,0) [x,y-1]
+    se ele apertou S,baixo: (2,1) [x+1,y]
+    se ele apertou D,direita: (1,2) [x,y+1]
+    */
+
+} mov_anterior;
+
 //variaveis globais usadas
+mov_anterior antiga_pos[4];
 char quemGanhou = 0;
 msg_do_cliente minha_intencao;
 msg_todos basica;
@@ -94,7 +111,7 @@ ALLEGRO_BITMAP *quebr = NULL;
 ALLEGRO_BITMAP *verde_1 = NULL;
 ALLEGRO_BITMAP *verde_2 = NULL;
 ALLEGRO_BITMAP *bomb = NULL;
-ALLEGRO_BITMAP *player = NULL;
+ALLEGRO_BITMAP *sprites = NULL;
 ALLEGRO_BITMAP *background = NULL;
 ALLEGRO_FONT *fonte = NULL;
 ALLEGRO_EVENT_QUEUE *fila_eventos = NULL;
@@ -102,10 +119,13 @@ ALLEGRO_EVENT_QUEUE *fila_eventos = NULL;
 // ALLEGRO_AUDIO_STREAM *musica = NULL;
 // ALLEGRO_SAMPLE *sample = NULL;
 bool sair = false;
+char anterior[4] = {'S','S','S','S'};
 //fim das variaveis globais
 
 
 //funcoes usadas.
+void atrib_jog_ant();
+void atribui_pos_ant();
 void tratar_intencao(char *controle,int inicio_aux_Bomba[],char *possoBombar);
 int verifica_posix(int posix_x, int posix_y,int inicio_aux_Bomba[]);
 void printa_matriz(int inicio_aux_Bomba[]);
@@ -196,8 +216,11 @@ void main(){
                     desconectado = 0;
                 }
 
-               	tamanho_msg_entregue = recvMsgFromServer(&basica,DONT_WAIT); //recebe mensagem
+                atribui_pos_ant(); //duvido vc adivinhar O QUE ESSA FUNCAO FAZ HEHE
 
+                //detalhe: ele recebe a pos do while anterior,depois recebe uma nova,tcharam
+               	tamanho_msg_entregue = recvMsgFromServer(&basica,DONT_WAIT); //recebe mensagem
+                atrib_jog_ant();
                 if(tamanho_msg_entregue != NO_MESSAGE){ // a mensagem foi recebida!
                     printa_matriz(inicio_aux_Bomba); //com certeza nao printa a matriz(gerar humor,ele printa sim)
                 }
@@ -419,9 +442,21 @@ void printa_matriz(int inicio_aux_Bomba[]){ //por hora,em printa matriz,ele so a
             for(k=0;k<max_clients;k++){
                 if(basica.jogadores[k].pos_x == i && basica.jogadores[k].pos_y == j){
                     printf("%d",basica.jogadores[k].id+1); // valor p simbolizar o jogador
-                    al_draw_bitmap(player, m, l, 0);
+                    //al_draw_bitmap(sprites, m, l, 0);
+                    switch (anterior[k]) { // printar a sprite de acordo com o jogador
+                      case 'W': al_draw_bitmap_region(sprites,111,0,37,37,m,l,0);
+                      break;
+                      case 'A': al_draw_bitmap_region(sprites,0,0,37,37,m,l,0);
+                      break;
+                      case 'S': al_draw_bitmap_region(sprites,74,0,37,37,m,l,0);
+                      break;
+                      case 'D': al_draw_bitmap_region(sprites,37,0,37,37,m,l,0);
+                      break;
+                    }
+                    //al_draw_bitmap_region(sprites,0,0,37,37,m,l,0);
                     verifica++;
-                }else if(inicio_aux_Bomba[k] == 1 && basica.jogadores[k].posbomba_x == i && basica.jogadores[k].posbomba_y == j){ //caso tenha uma bomba no mapa
+                }
+                else if(inicio_aux_Bomba[k] == 1 && basica.jogadores[k].posbomba_x == i && basica.jogadores[k].posbomba_y == j){ //caso tenha uma bomba no mapa
                     printf("b"); //printa a bomba(mas o jogador vai em cima,caso esteja no mesmo bloco,por hora)
                     al_draw_bitmap(bomb, m, l, 0);
                     verifica++;
@@ -476,10 +511,11 @@ void contador_Bombas(int inicio_aux_Bomba[],time_t inicio_Bomba[],time_t atual_B
                         al_draw_bitmap(background, 0, 0, 0);
                         al_draw_text(fonte, al_map_rgb(255, 255, 255), Ltela / 2, 250, ALLEGRO_ALIGN_CENTRE, "Voce PERDEU!!!");
                         al_flip_display();
-                        //al_rest(3.0);
+                        al_rest(5.0);
                     }
                     inicio_aux_Bomba[i] = 0; //prepara para receber outra bomba
                     printf("BOOM\n");
+                    printa_matriz(inicio_aux_Bomba);
                }
           }
      }
@@ -644,9 +680,9 @@ bool inicializar () {
       al_destroy_event_queue(fila_eventos);
       return false;
   }
-  player = al_load_bitmap("player.png");
-  if (!player) {
-      puts("Falha ao carregar imagem do player.\n");
+  sprites = al_load_bitmap("sprites.jpeg");
+  if (!sprites) {
+      puts("Falha ao carregar imagem do sprites.\n");
       al_destroy_display(janela);
       al_destroy_event_queue(fila_eventos);
       return false;
@@ -667,4 +703,37 @@ void destroy () {
   al_destroy_font(fonte);
   al_destroy_display(janela);
   al_destroy_event_queue(fila_eventos);
+}
+
+void atribui_pos_ant(){ //antiga_pos[x].id/pos_ant_x/y
+    antiga_pos[0].id = basica.jogadores[0].id;
+    antiga_pos[0].pos_ant_x = basica.jogadores[0].pos_x;
+    antiga_pos[0].pos_ant_y = basica.jogadores[0].pos_y;
+
+    antiga_pos[1].id = basica.jogadores[1].id;
+    antiga_pos[1].pos_ant_x = basica.jogadores[1].pos_x;
+    antiga_pos[1].pos_ant_y = basica.jogadores[1].pos_y;
+
+    antiga_pos[2].id = basica.jogadores[2].id;
+    antiga_pos[2].pos_ant_x = basica.jogadores[2].pos_x;
+    antiga_pos[2].pos_ant_y = basica.jogadores[2].pos_y;
+
+    antiga_pos[3].id = basica.jogadores[3].id;
+    antiga_pos[3].pos_ant_x = basica.jogadores[3].pos_x;
+    antiga_pos[3].pos_ant_y = basica.jogadores[3].pos_y;
+
+}
+
+void atrib_jog_ant () { // verificar a posicao anteior do jogador
+  int i;
+  for (i=0;i<4;i++) {
+      if (basica.jogadores[i].pos_x < antiga_pos[i].pos_ant_x)
+      anterior[i] = 'W';
+      if (basica.jogadores[i].pos_x > antiga_pos[i].pos_ant_x)
+      anterior[i] = 'S';
+      if (basica.jogadores[i].pos_y < antiga_pos[i].pos_ant_y)
+      anterior[i] = 'A';
+      if (basica.jogadores[i].pos_y > antiga_pos[i].pos_ant_y)
+      anterior[i] = 'D';
+    }
 }
