@@ -461,8 +461,7 @@ void printa_matriz(int inicio_aux_Bomba[]){ //por hora,em printa matriz,ele so a
                 else if(inicio_aux_Bomba[k] == 1 && basica.jogadores[k].posbomba_x == i && basica.jogadores[k].posbomba_y == j){ //caso tenha uma bomba no mapa
                     printf("b"); //printa a bomba(mas o jogador vai em cima,caso esteja no mesmo bloco,por hora)
                     if (tmp_bomb) {
-                      al_draw_bitmap(explosion, m-37, l-37, 0);
-                      tmp_bomb = 0;
+                      al_draw_bitmap(explosion, m-37, l-37, 0); // if para a explosao
                     }
                     else {
                       al_draw_bitmap(bomb, m, l, 0);
@@ -489,6 +488,10 @@ void printa_matriz(int inicio_aux_Bomba[]){ //por hora,em printa matriz,ele so a
         }printf("\n");
     }
     al_flip_display();
+    if (tmp_bomb) { // delay qdo a variavel da bomba for um para manter a explosao por mais tempo
+      al_rest(0.15); // tempo bem curto pra tentar manter a jogabilidade
+      tmp_bomb = 0;
+    }
 }
 
 void contador_Bombas(int inicio_aux_Bomba[],time_t inicio_Bomba[],time_t atual_Bomba[],char *possoBombar){
@@ -523,7 +526,6 @@ void contador_Bombas(int inicio_aux_Bomba[],time_t inicio_Bomba[],time_t atual_B
                     }
                     inicio_aux_Bomba[i] = 0; //prepara para receber outra bomba
                     printf("BOOM\n");
-                    tmp_bomb = 1;
                     printa_matriz(inicio_aux_Bomba);
                }
           }
@@ -579,8 +581,10 @@ char controla_raio_explosao(char matou,int inicio_aux_Bomba[]){ //
 
           }
       }
-    if(verificou != 0)
-        printa_matriz(inicio_aux_Bomba);
+    if(verificou != 0) {
+      tmp_bomb = 1; // adiciona 1 a variavel para explosao
+      printa_matriz(inicio_aux_Bomba);
+    }
     return matou; //retorna 0 - nao morreu ou 1 - morreu
 }
 
