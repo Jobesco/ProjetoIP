@@ -1,7 +1,7 @@
 #include "server.h"
 #include "default.h"
 #include "comum.h"
-#define max_clients 1 // Esta em 1 apenas pra facilitar os testes, depois altera pra 4
+#define max_clients 4 // Esta em 1 apenas pra facilitar os testes, depois altera pra 4
 #define tamanho_altura 8
 #define tamanho_largura 12
 #define pedra 0
