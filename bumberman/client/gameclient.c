@@ -121,7 +121,7 @@ ALLEGRO_EVENT_QUEUE *fila_eventos = NULL;
 // ALLEGRO_SAMPLE *sample = NULL;
 bool sair = false;
 char anterior[4] = {'S','S','S','S'};
-int tmp_bomb = 0, tmp_inicio = 1; // variavel pra printar qdo a bomba explodir
+int tmp_bomb = 0; // variavel pra printar qdo a bomba explodir
 //fim das variaveis globais
 
 
@@ -139,7 +139,6 @@ void salvar_historico();
 void alterar_historico(char ganhou);
 bool inicializar();
 void destroy ();
-//void valida_ip();
 //fim das funcoes usadas
 
 
@@ -316,7 +315,7 @@ int verifica_fim_jogo(){
             al_draw_bitmap(background, 0, 0, 0);
             al_draw_text(fonte, al_map_rgb(255, 255, 255), Ltela / 2, 250, ALLEGRO_ALIGN_CENTRE, "Voce GANHOU!!!");
             al_flip_display();
-            //al_rest(3.0);
+            al_rest(3.0);
             alterar_historico(1); //se for 1,ele ganhou
             return 1;
         }
