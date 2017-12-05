@@ -557,25 +557,25 @@ char controla_raio_explosao(char matou,int inicio_aux_Bomba[]){ //
 
           if(matriz[basica.jogadores[k].posbomba_x+1][basica.jogadores[k].posbomba_y] == quebra){
 
-              matriz[basica.jogadores[k].posbomba_x+1][basica.jogadores[k].posbomba_y] = verd_1;
+              matriz[basica.jogadores[k].posbomba_x+1][basica.jogadores[k].posbomba_y] = ((basica.jogadores[k].posbomba_x) + basica.jogadores[k].posbomba_y) % 2 == 0? verd_2 : verd_1;
               verificou = 1;
 
           }
           if(matriz[basica.jogadores[k].posbomba_x-1][basica.jogadores[k].posbomba_y] == quebra){
 
-              matriz[basica.jogadores[k].posbomba_x-1][basica.jogadores[k].posbomba_y] = verd_1;
+              matriz[basica.jogadores[k].posbomba_x-1][basica.jogadores[k].posbomba_y] = ((basica.jogadores[k].posbomba_x) + basica.jogadores[k].posbomba_y) % 2 == 0? verd_2 : verd_1;
               verificou = 1;
 
           }
           if(matriz[basica.jogadores[k].posbomba_x][basica.jogadores[k].posbomba_y+1] == quebra){
 
-              matriz[basica.jogadores[k].posbomba_x][basica.jogadores[k].posbomba_y+1] = verd_1;
+              matriz[basica.jogadores[k].posbomba_x][basica.jogadores[k].posbomba_y+1] = ((basica.jogadores[k].posbomba_x) + basica.jogadores[k].posbomba_y) % 2 == 0? verd_2 : verd_1;
               verificou = 1;
 
           }
           if(matriz[basica.jogadores[k].posbomba_x][basica.jogadores[k].posbomba_y-1] == quebra){
 
-              matriz[basica.jogadores[k].posbomba_x][basica.jogadores[k].posbomba_y-1] = verd_1;
+              matriz[basica.jogadores[k].posbomba_x][basica.jogadores[k].posbomba_y-1] = ((basica.jogadores[k].posbomba_x) + basica.jogadores[k].posbomba_y) % 2 == 0? verd_2 : verd_1;
               verificou = 1;
 
           }
