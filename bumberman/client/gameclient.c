@@ -523,6 +523,7 @@ void contador_Bombas(int inicio_aux_Bomba[],time_t inicio_Bomba[],time_t atual_B
                         al_rest(5.0);
                     }
                     inicio_aux_Bomba[i] = 0; //prepara para receber outra bomba
+                    //tmp_bomb = 1;
                     printf("BOOM\n");
                     printa_matriz(inicio_aux_Bomba);
                }
@@ -581,6 +582,10 @@ char controla_raio_explosao(char matou,int inicio_aux_Bomba[]){ //
       }
     if(verificou != 0) {
       tmp_bomb = 1; // adiciona 1 a variavel para explosao
+      printa_matriz(inicio_aux_Bomba);
+    }
+    else {
+      tmp_bomb = 1;
       printa_matriz(inicio_aux_Bomba);
     }
     return matou; //retorna 0 - nao morreu ou 1 - morreu
