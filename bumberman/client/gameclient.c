@@ -121,7 +121,7 @@ ALLEGRO_EVENT_QUEUE *fila_eventos = NULL;
 // ALLEGRO_SAMPLE *sample = NULL;
 bool sair = false;
 char anterior[4] = {'S','S','S','S'};
-int tmp_bomb = 0; // variavel pra printar qdo a bomba explodir
+int tmp_bomb = 0, tmp_inicio = 1; // variavel pra printar qdo a bomba explodir
 //fim das variaveis globais
 
 
@@ -139,6 +139,7 @@ void salvar_historico();
 void alterar_historico(char ganhou);
 bool inicializar();
 void destroy ();
+//void valida_ip();
 //fim das funcoes usadas
 
 
@@ -271,10 +272,8 @@ void main(){
     	        }
               if(verifica_fim_jogo() == 1){
                   desconectado = 1;
-                  printf("Deseja Jogar novamente?\n0 - Nao\n1 - Sim\n");
-                  scanf(" %d",&respostaJogo);
-                  if(respostaJogo == 1)
-                    printf("Infelizmente a biblioteca q usamos nao permite que ele reconecte sem recompilar,hehe\nPor favor,reinicie o cliente para poder jogar novamente!\n");
+                  destroy();
+                  printf("Infelizmente a biblioteca q usamos nao permite que ele reconecte sem recompilar,hehe\nPor favor,reinicie o cliente e o server se quiser jogar novamente!\n");
                 respostaJogo = 0;
               } // autoexplicativo
 
