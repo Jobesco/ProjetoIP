@@ -119,7 +119,7 @@ ALLEGRO_EVENT_QUEUE *fila_eventos = NULL;
 //ALLEGRO_TIMEOUT timeout;
 // ALLEGRO_AUDIO_STREAM *musica = NULL;
 // ALLEGRO_SAMPLE *sample = NULL;
-bool sair = false;
+bool sair = false, cor_matriz_inicial = true;
 char anterior[4] = {'S','S','S','S'};
 int tmp_bomb = 0; // variavel pra printar qdo a bomba explodir
 //fim das variaveis globais
@@ -197,11 +197,18 @@ void main(){
           puts("Falha ao carregar bibliotecas!!!");
           return 1;
         }
+
+        if(cor_matriz_inicial) { // corrigir a cor do fundo do boneco na inicializacao
+          printa_matriz(inicio_aux_Bomba);
+          cor_matriz_inicial = false;
+        }
+
         al_draw_bitmap(background, 0, 0, 0);
         al_draw_text(fonte, al_map_rgb(255, 255, 255), Ltela / 2, 200, ALLEGRO_ALIGN_CENTRE, "Ei, ainda falta alguns jogadores!!!");
         al_draw_text(fonte, al_map_rgb(255, 255, 255), Ltela / 2, 250, ALLEGRO_ALIGN_CENTRE, "Enquanto espera... ");
         al_draw_text(fonte, al_map_rgb(255, 255, 255), Ltela / 2, 300, ALLEGRO_ALIGN_CENTRE, "Observe este lindo background... =D");
         al_flip_display();
+
     	while(desconectado != 1){ // verifica se o client ainda joga
 
             if(estado == SERVER_UP){ //conexao estabelecida // prosseguir
@@ -462,7 +469,13 @@ void printa_matriz(int inicio_aux_Bomba[]){ //por hora,em printa matriz,ele so a
                       al_draw_bitmap(explosion, m-37, l-37, 0); // if para a explosao
                     }
                     else {
-                      al_draw_bitmap(bomb, m, l, 0);
+                      if ((i + j) % 2 == 0) {
+                        al_draw_bitmap_region(bomb,0,0,37,37,m,l,0);
+                      }
+                      else {
+                        al_draw_bitmap_region(bomb,37,0,37,37,m,l,0);
+                      }
+                      //al_draw_bitmap(bomb, m, l, 0);
                     }
                     verifica++;
                 }
@@ -689,7 +702,7 @@ bool inicializar () {
       al_destroy_event_queue(fila_eventos);
       return false;
   }
-  bomb = al_load_bitmap("bomb.bmp");
+  bomb = al_load_bitmap("bomb.png");
   if (!bomb) {
       puts("Falha ao carregar imagem bomb.\n");
       al_destroy_display(janela);
