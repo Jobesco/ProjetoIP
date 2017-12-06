@@ -116,7 +116,6 @@ ALLEGRO_BITMAP *explosion = NULL;
 ALLEGRO_BITMAP *background = NULL;
 ALLEGRO_FONT *fonte = NULL;
 ALLEGRO_EVENT_QUEUE *fila_eventos = NULL;
-//ALLEGRO_TIMEOUT timeout;
 // ALLEGRO_AUDIO_STREAM *musica = NULL;
 // ALLEGRO_SAMPLE *sample = NULL;
 bool sair = false, cor_matriz_inicial = true;
@@ -143,6 +142,12 @@ void destroy ();
 
 
 void main(){
+
+  /*musica = al_load_audio_stream("Derulo.ogg", 4, 1024);
+   if (!musica) {
+       puts("Falha ao carregar audio.\n");
+       return false;
+  }*/
 
 	char *IP;
 
@@ -237,8 +242,7 @@ void main(){
                 while (!al_is_event_queue_empty(fila_eventos)) {
                   ALLEGRO_EVENT evento;
                   al_get_next_event(fila_eventos, &evento);
-                  //al_wait_for_event(fila_eventos, &evento);
-                  //al_wait_for_event_until(fila_eventos, &evento, &timeout);
+
                   if (evento.type == ALLEGRO_EVENT_KEY_DOWN) {
                       switch(evento.keyboard.keycode) {
                       case ALLEGRO_KEY_W : controle = 'W';
@@ -260,7 +264,6 @@ void main(){
                       return 0;
                   }
                 }
-                //al_wait_for_event(fila_eventos, &evento);
                 //controle = getch(); //recebe um valor em char que indica a tecla apertada,retorna NO_KEY_PRESSED se ele nao apertou tecla alguma
                 tratar_intencao(&controle,inicio_aux_Bomba,&possoBombar); //verifica se ele pode executar o movimento antes mesmo de enviar para o servidor,assim,o servidor executa menos tarefas
 
@@ -449,7 +452,6 @@ void printa_matriz(int inicio_aux_Bomba[]){ //por hora,em printa matriz,ele so a
             for(k=0;k<max_clients;k++){
                 if(basica.jogadores[k].pos_x == i && basica.jogadores[k].pos_y == j){
                     printf("%d",basica.jogadores[k].id+1); // valor p simbolizar o jogador
-                    //al_draw_bitmap(sprites, m, l, 0);
                     switch (anterior[k]) { // printar a sprite de acordo com o jogador
                       case 'W': al_draw_bitmap_region(sprites,111,37*k,37,37,m,l,0);
                       break;
@@ -460,7 +462,6 @@ void printa_matriz(int inicio_aux_Bomba[]){ //por hora,em printa matriz,ele so a
                       case 'D': al_draw_bitmap_region(sprites,37,37*k,37,37,m,l,0);
                       break;
                     }
-                    //al_draw_bitmap_region(sprites,0,0,37,37,m,l,0);
                     verifica++;
                 }
                 else if(inicio_aux_Bomba[k] == 1 && basica.jogadores[k].posbomba_x == i && basica.jogadores[k].posbomba_y == j){ //caso tenha uma bomba no mapa
@@ -609,31 +610,26 @@ bool inicializar () {
       puts("Falha ao inicializar a Allegro.\n");
       return false;
   }
-  // if (!al_install_audio()) {
-  //     fprintf(stderr, "Falha ao inicializar áudio.\n");
-  //     return false;
-  // }
-  //
-  // if (!al_init_acodec_addon()) {
-  //     fprintf(stderr, "Falha ao inicializar codecs de áudio.\n");
-  //     return false;
-  // }
-  //
-  // if (!al_reserve_samples(1)) {
-  //     fprintf(stderr, "Falha ao alocar canais de audio.\n");
-  //     return false;
-  // }
-  // sample = al_load_sample("teste2.ogg");
-  // if (!sample) {
-  //     puts("Falha ao carregar sample.\n");
-  //     return false;
-  // }
-  // musica = al_load_audio_stream("teste1.ogg", 4, 1024);
-  // if (!musica) {
-  //     puts("Falha ao carregar audio.\n");
-  //     return false;
-  // }
-  //al_init_timeout(&timeout, 0.001);
+  /* if (!al_install_audio()) {
+       fprintf(stderr, "Falha ao inicializar áudio.\n");
+       return false;
+   }
+
+   if (!al_init_acodec_addon()) {
+       fprintf(stderr, "Falha ao inicializar codecs de áudio.\n");
+       return false;
+   }
+
+   if (!al_reserve_samples(1)) {
+       fprintf(stderr, "Falha ao alocar canais de audio.\n");
+       return false;
+   }
+   sample = al_load_sample("teste2.ogg");
+   if (!sample) {
+       puts("Falha ao carregar sample.\n");
+       return false;
+  }*/
+
   al_init_font_addon();
   if (!al_init_ttf_addon()) {
       puts("Falha ao inicializar add-on allegro_ttf.\n");
@@ -653,8 +649,7 @@ bool inicializar () {
       return false;
   }
   al_set_window_title(janela, "CINXPLODE");
-//  al_set_window_position(janela, 200, 100); //setar a posicao da janela // HUGO
-//  al_set_new_display_flags(ALLEGRO_WINDOWED | ALLEGRO_RESIZABLE);// para poder ajustar o tamanho da tela. // HUGO
+
   fonte = al_load_font("comic.ttf", 48, 0);
   if (!fonte) {
       puts("Falha ao carregar \"fonte comic.ttf\".\n");
@@ -739,6 +734,7 @@ void destroy () {
   al_destroy_font(fonte);
   al_destroy_display(janela);
   al_destroy_event_queue(fila_eventos);
+  //al_destroy_audio_stream(musica);
 }
 
 void atribui_pos_ant(){ //antiga_pos[x].id/pos_ant_x/y
