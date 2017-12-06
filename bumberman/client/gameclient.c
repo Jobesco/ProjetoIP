@@ -1,9 +1,18 @@
 #include "client.h"
 #include "default.h"
 #include "comum.h"
+#include <stdbool.h>
+#include <allegro5/allegro.h>
+#include <allegro5/allegro_image.h>
+#include <allegro5/allegro_ttf.h>
+#include <allegro5/allegro_font.h>
+#include <allegro5/allegro_audio.h>
+#include <allegro5/allegro_acodec.h>
 #define max_clients 4
-#define tamanho_altura 22
+#define tamanho_altura 17
 #define tamanho_largura 27
+#define Ltela 999 // Definir tamanho padrao da largura
+#define Atela 629 // Definir tamanho padrao da altura
 #define pedra 0
 #define verd_1 1
 #define verd_2 2
@@ -11,34 +20,6 @@
 #define quebra 4 //objetos quebraveis
 
 char posicao[2] = {""};
-
-
-char matriz[tamanho_altura][tamanho_largura] = {
-
-    {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0},
-    {0,1,2,1,2,4,0,1,2,4,4,0,0,4,2,1,2,1,0,4,0,1,4,1,2,1,0},
-    {0,2,1,0,1,4,4,4,4,2,1,4,4,4,1,2,4,2,1,4,1,2,4,2,4,2,0},
-    {0,1,0,1,0,4,2,4,2,1,2,1,2,4,4,4,2,4,2,4,4,1,4,4,4,0,0},
-    {0,4,4,2,4,0,1,2,0,2,1,2,1,2,1,2,1,2,1,2,1,0,4,0,4,4,0},
-    {0,1,2,4,2,1,4,1,4,1,2,1,4,1,4,0,0,1,2,1,2,1,2,1,2,1,0},
-    {0,0,0,4,4,4,4,4,1,2,4,2,1,2,4,2,0,4,1,4,1,2,1,4,4,4,0},
-    {0,0,0,4,4,4,4,4,2,1,2,1,2,1,4,1,0,1,2,1,2,1,2,1,2,1,0},
-    {0,2,1,2,1,0,1,4,1,2,0,2,1,2,4,4,0,2,4,2,0,4,1,4,1,2,0},
-    {0,1,2,1,2,0,2,1,2,1,2,1,4,4,0,1,2,1,2,1,2,4,4,4,4,4,0},
-    {0,4,1,2,1,2,1,0,0,2,4,2,1,2,0,2,4,2,1,2,4,2,1,4,4,4,0},
-    {0,1,4,4,2,1,2,1,2,4,4,4,2,4,0,1,2,1,0,1,2,1,2,4,2,1,0},
-    {0,2,1,2,4,2,1,2,1,2,1,2,1,2,0,2,4,4,4,4,4,0,1,2,1,2,0},
-    {0,1,2,1,4,0,0,4,4,1,2,4,4,4,4,1,2,1,2,4,4,4,2,1,2,1,0},
-    {0,4,1,2,4,2,1,2,1,0,0,4,0,2,4,4,1,2,1,4,0,4,4,4,4,4,0},
-    {0,4,0,0,4,4,4,0,4,4,2,1,2,1,2,1,2,0,2,1,0,1,2,1,2,1,0},
-    {0,2,1,2,1,2,1,2,1,2,1,4,1,2,1,2,1,2,1,2,1,2,1,0,1,2,0},
-    {0,1,2,1,2,0,0,0,2,1,2,1,2,1,2,1,2,4,2,4,4,0,2,1,0,0,0},
-    {0,2,0,4,4,4,4,2,1,2,0,2,1,4,4,4,0,4,1,2,1,2,4,4,1,2,0},
-    {0,1,2,1,0,4,2,0,2,4,4,4,4,4,4,4,2,1,4,4,4,4,2,0,2,1,0},
-    {0,2,1,2,1,4,4,2,1,2,1,4,1,2,1,2,1,2,1,2,1,0,1,2,1,2,0},
-    {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0},
-
-};
 
 typedef struct historico{
 
@@ -48,6 +29,28 @@ typedef struct historico{
   double win_ratio; // partidas ganhas / partidas jogadas
 
 }historico;
+
+char matriz[tamanho_altura][tamanho_largura] = {
+
+    {pedra,pedra,pedra,pedra,pedra,pedra,pedra,pedra,pedra,pedra,pedra,pedra,pedra,pedra,pedra,pedra,pedra,pedra,pedra,pedra,pedra,pedra,pedra,pedra,pedra,pedra,pedra},
+    {pedra,verd_1,verd_2,verd_1,quebra,verd_1,pedra,pedra,verd_2,verd_1,quebra,verd_1,verd_2,verd_1,quebra,quebra,verd_2,verd_1,verd_2,verd_1,verd_2,verd_1,pedra,verd_1,verd_2,verd_1,pedra},
+    {pedra,verd_2,verd_1,quebra,quebra,verd_2,pedra,pedra,verd_1,verd_2,verd_1,quebra,verd_1,verd_2,verd_1,pedra,verd_1,verd_2,pedra,verd_2,verd_1,verd_2,verd_1,verd_2,verd_1,verd_2,pedra},
+    {pedra,verd_1,quebra,verd_1,verd_2,quebra,quebra,quebra,verd_2,verd_1,verd_2,quebra,verd_2,verd_1,verd_2,pedra,verd_2,verd_1,quebra,verd_1,verd_2,quebra,quebra,quebra,verd_2,verd_1,pedra},
+    {pedra,verd_2,verd_1,pedra,quebra,verd_2,quebra,quebra,verd_1,verd_2,verd_1,verd_2,quebra,quebra,quebra,quebra,verd_1,verd_2,quebra,pedra,verd_1,verd_2,verd_1,pedra,verd_1,verd_2,pedra},
+    {pedra,quebra,quebra,quebra,pedra,verd_1,quebra,quebra,pedra,pedra,verd_2,verd_1,verd_2,pedra,verd_2,quebra,verd_2,pedra,quebra,quebra,quebra,verd_1,quebra,verd_1,quebra,quebra,pedra},
+    {pedra,pedra,quebra,verd_2,verd_1,quebra,quebra,quebra,verd_1,verd_2,verd_1,verd_2,verd_1,pedra,verd_1,quebra,verd_1,pedra,quebra,verd_2,quebra,quebra,quebra,quebra,pedra,quebra,pedra},
+    {pedra,verd_1,quebra,quebra,verd_2,verd_1,quebra,quebra,quebra,verd_1,pedra,verd_1,quebra,quebra,verd_2,quebra,verd_2,pedra,verd_2,pedra,verd_2,verd_1,verd_2,verd_1,verd_2,verd_1,pedra},
+    {pedra,verd_2,quebra,verd_2,pedra,quebra,verd_1,verd_2,verd_1,verd_2,pedra,verd_2,verd_1,quebra,verd_1,quebra,verd_1,verd_2,quebra,verd_2,quebra,quebra,verd_1,quebra,pedra,quebra,pedra},
+    {pedra,quebra,verd_2,verd_1,verd_2,verd_1,verd_2,verd_1,verd_2,verd_1,verd_2,quebra,verd_2,verd_1,pedra,quebra,verd_2,verd_1,verd_2,quebra,verd_2,verd_1,verd_2,verd_1,verd_2,verd_1,pedra},
+    {pedra,quebra,verd_1,verd_2,verd_1,verd_2,quebra,verd_2,pedra,verd_2,quebra,quebra,verd_1,verd_2,pedra,verd_2,verd_1,verd_2,pedra,quebra,verd_1,verd_2,pedra,verd_2,verd_1,pedra,pedra},
+    {pedra,pedra,quebra,verd_1,verd_2,verd_1,verd_2,verd_1,verd_2,verd_1,verd_2,quebra,verd_2,quebra,quebra,verd_1,quebra,verd_1,verd_2,quebra,quebra,verd_1,quebra,verd_1,quebra,verd_1,pedra},
+    {pedra,pedra,quebra,verd_2,verd_1,quebra,verd_1,verd_2,verd_1,quebra,verd_1,verd_2,verd_1,quebra,pedra,verd_2,verd_1,verd_2,verd_1,quebra,verd_1,quebra,verd_1,quebra,verd_1,quebra,pedra},
+    {pedra,quebra,quebra,quebra,verd_2,verd_1,verd_2,verd_1,verd_2,quebra,verd_2,quebra,verd_2,quebra,verd_2,verd_1,verd_2,verd_1,quebra,quebra,verd_2,pedra,verd_2,quebra,pedra,verd_1,pedra},
+    {pedra,verd_2,verd_1,quebra,verd_1,quebra,quebra,quebra,quebra,pedra,pedra,pedra,pedra,quebra,quebra,verd_2,verd_1,verd_2,pedra,quebra,verd_1,quebra,pedra,quebra,verd_1,verd_2,pedra},
+    {pedra,verd_1,verd_2,quebra,verd_2,pedra,verd_2,verd_1,quebra,verd_1,verd_2,verd_1,verd_2,verd_1,quebra,verd_1,verd_2,verd_1,quebra,quebra,verd_2,verd_1,pedra,verd_1,verd_2,verd_1,pedra},
+    {pedra,pedra,pedra,pedra,pedra,pedra,pedra,pedra,pedra,pedra,pedra,pedra,pedra,pedra,pedra,pedra,pedra,pedra,pedra,pedra,pedra,pedra,pedra,pedra,pedra,pedra,pedra}
+
+};
 
 typedef struct{
   char id;
@@ -74,7 +77,24 @@ typedef struct p_broadcast{
 
 } msg_todos;
 
+typedef struct mov_anterior{
+    char id;
+    char pos_ant_x;
+    char pos_ant_y;
+
+    /*
+    hora de entender as logicas
+    digamos que temos uma matriz de 3,e temos um jogador no meio,ou seja,(1,1) [x,y]
+    se ele apertou W,cima: (0,1) [x-1,y]
+    se ele apertou A,esquerda: (1,0) [x,y-1]
+    se ele apertou S,baixo: (2,1) [x+1,y]
+    se ele apertou D,direita: (1,2) [x,y+1]
+    */
+
+} mov_anterior;
+
 //variaveis globais usadas
+mov_anterior antiga_pos[4];
 char quemGanhou = 0;
 msg_do_cliente minha_intencao;
 msg_todos basica;
@@ -83,10 +103,30 @@ int verifica = 0; //tambem é global,referente a funcao printa_matriz
 historico hist; // declara struct do tipo historico
 historico para_ler;
 int n_bombas = 0;
+
+ALLEGRO_DISPLAY *janela = NULL;
+ALLEGRO_BITMAP *marro = NULL;
+ALLEGRO_BITMAP *pedr = NULL;
+ALLEGRO_BITMAP *quebr = NULL;
+ALLEGRO_BITMAP *verde_1 = NULL;
+ALLEGRO_BITMAP *verde_2 = NULL;
+ALLEGRO_BITMAP *bomb = NULL;
+ALLEGRO_BITMAP *sprites = NULL;
+ALLEGRO_BITMAP *explosion = NULL;
+ALLEGRO_BITMAP *background = NULL;
+ALLEGRO_FONT *fonte = NULL;
+ALLEGRO_EVENT_QUEUE *fila_eventos = NULL;
+// ALLEGRO_AUDIO_STREAM *musica = NULL;
+// ALLEGRO_SAMPLE *sample = NULL;
+bool sair = false, cor_matriz_inicial = true;
+char anterior[4] = {'S','S','S','S'};
+int tmp_bomb = 0; // variavel pra printar qdo a bomba explodir
 //fim das variaveis globais
 
 
 //funcoes usadas.
+void atrib_jog_ant();
+void atribui_pos_ant();
 void tratar_intencao(char *controle,int inicio_aux_Bomba[],char *possoBombar);
 int verifica_posix(int posix_x, int posix_y,int inicio_aux_Bomba[]);
 void printa_matriz(int inicio_aux_Bomba[]);
@@ -96,10 +136,18 @@ int verifica_fim_jogo();
 void apresentar_historico();
 void salvar_historico();
 void alterar_historico(char ganhou);
+bool inicializar();
+void destroy ();
 //fim das funcoes usadas
 
 
 void main(){
+
+  /*musica = al_load_audio_stream("Derulo.ogg", 4, 1024);
+   if (!musica) {
+       puts("Falha ao carregar audio.\n");
+       return false;
+  }*/
 
 	char *IP;
 
@@ -150,6 +198,21 @@ void main(){
             verifica = 0;
             break;
         }
+        if (!inicializar()) {
+          puts("Falha ao carregar bibliotecas!!!");
+          return 1;
+        }
+
+        if(cor_matriz_inicial) { // corrigir a cor do fundo do boneco na inicializacao
+          printa_matriz(inicio_aux_Bomba);
+          cor_matriz_inicial = false;
+        }
+
+        al_draw_bitmap(background, 0, 0, 0);
+        al_draw_text(fonte, al_map_rgb(255, 255, 255), Ltela / 2, 200, ALLEGRO_ALIGN_CENTRE, "Ei, ainda falta alguns jogadores!!!");
+        al_draw_text(fonte, al_map_rgb(255, 255, 255), Ltela / 2, 250, ALLEGRO_ALIGN_CENTRE, "Enquanto espera... ");
+        al_draw_text(fonte, al_map_rgb(255, 255, 255), Ltela / 2, 300, ALLEGRO_ALIGN_CENTRE, "Observe este lindo background... =D");
+        al_flip_display();
 
     	while(desconectado != 1){ // verifica se o client ainda joga
 
@@ -167,16 +230,44 @@ void main(){
                     desconectado = 0;
                 }
 
-               	tamanho_msg_entregue = recvMsgFromServer(&basica,DONT_WAIT); //recebe mensagem
+                atribui_pos_ant(); //duvido vc adivinhar O QUE ESSA FUNCAO FAZ HEHE
 
+                //detalhe: ele recebe a pos do while anterior,depois recebe uma nova,tcharam
+               	tamanho_msg_entregue = recvMsgFromServer(&basica,DONT_WAIT); //recebe mensagem
+                atrib_jog_ant();
                 if(tamanho_msg_entregue != NO_MESSAGE){ // a mensagem foi recebida!
                     printa_matriz(inicio_aux_Bomba); //com certeza nao printa a matriz(gerar humor,ele printa sim)
                 }
+                controle = NO_KEY_PRESSED;
+                while (!al_is_event_queue_empty(fila_eventos)) {
+                  ALLEGRO_EVENT evento;
+                  al_get_next_event(fila_eventos, &evento);
 
-                controle = getch(); //recebe um valor em char que indica a tecla apertada,retorna NO_KEY_PRESSED se ele nao apertou tecla alguma
+                  if (evento.type == ALLEGRO_EVENT_KEY_DOWN) {
+                      switch(evento.keyboard.keycode) {
+                      case ALLEGRO_KEY_W : controle = 'W';
+                          break;
+                      case ALLEGRO_KEY_S: controle = 'S';
+                          break;
+                      case ALLEGRO_KEY_A: controle = 'A';
+                          break;
+                      case ALLEGRO_KEY_D: controle = 'D';
+                          break;
+                      case ALLEGRO_KEY_K: controle = 'K';
+                          break;
+                      default : controle = NO_KEY_PRESSED;
+                      }
+                  }
+                  else if (evento.type == ALLEGRO_EVENT_DISPLAY_CLOSE) {
+                      destroy();
+                      sair = true;
+                      return 0;
+                  }
+                }
+                //controle = getch(); //recebe um valor em char que indica a tecla apertada,retorna NO_KEY_PRESSED se ele nao apertou tecla alguma
                 tratar_intencao(&controle,inicio_aux_Bomba,&possoBombar); //verifica se ele pode executar o movimento antes mesmo de enviar para o servidor,assim,o servidor executa menos tarefas
-                contador_Bombas(inicio_aux_Bomba,inicio_Bomba,atual_Bomba,&possoBombar); //ve se tem bomba
 
+                contador_Bombas(inicio_aux_Bomba,inicio_Bomba,atual_Bomba,&possoBombar); //ve se tem bomba
                 if(controle != NO_KEY_PRESSED){ //se ele apertou uma tecla
                 	if(controle != 'K'){ //se ele nao apertou K,ele tentou se mover(verificado antes por tratar_intencao)
     	            	retorno = sendMsgToServer(&minha_intencao,sizeof(msg_do_cliente)); // manda a intencao de bomba
@@ -188,13 +279,10 @@ void main(){
                 if(retorno == SERVER_DISCONNECTED){
     	        	desconectado = 1;
     	        }
-
               if(verifica_fim_jogo() == 1){
                   desconectado = 1;
-                  printf("Deseja Jogar novamente?\n0 - Nao\n1 - Sim\n");
-                  scanf(" %d",&respostaJogo);
-                  if(respostaJogo == 1)
-                    printf("Infelizmente a biblioteca q usamos nao permite que ele reconecte sem recompilar,hehe\nPor favor,reinicie o cliente para poder jogar novamente!\n");
+                  destroy();
+                  printf("Infelizmente a biblioteca q usamos nao permite que ele reconecte sem recompilar,hehe\nPor favor,reinicie o cliente e o server se quiser jogar novamente!\n");
                 respostaJogo = 0;
               } // autoexplicativo
 
@@ -234,6 +322,10 @@ int verifica_fim_jogo(){
             return 1;
         }else{
             printf("Voce ganhou!\n");
+            al_draw_bitmap(background, 0, 0, 0);
+            al_draw_text(fonte, al_map_rgb(255, 255, 255), Ltela / 2, 250, ALLEGRO_ALIGN_CENTRE, "Voce GANHOU!!!");
+            al_flip_display();
+            al_rest(3.0);
             alterar_historico(1); //se for 1,ele ganhou
             return 1;
         }
@@ -352,30 +444,65 @@ void tratar_intencao(char *controle,int inicio_aux_Bomba[],char *possoBombar){
 
 void printa_matriz(int inicio_aux_Bomba[]){ //por hora,em printa matriz,ele so atualiza o relogio se o cara se movimentar,cabe a glr de allegro colocar um timer independente e funcional
     system("clear"); //limpa o cmd
-    int i,j,k;
+    int i,j,k,l,m;
     printf("%.0lf\n",240 - difftime(atualJogo,inicioJogo));
-
-    for(i=0;i<tamanho_altura;i++){
-        for(j=0;j<tamanho_largura;j++){
+    for(i=0, l=0;i<tamanho_altura;i++, l+=37){
+        for(j=0, m=0;j<tamanho_largura;j++, m+=37){
             verifica = 0;
             for(k=0;k<max_clients;k++){
                 if(basica.jogadores[k].pos_x == i && basica.jogadores[k].pos_y == j){
                     printf("%d",basica.jogadores[k].id+1); // valor p simbolizar o jogador
+                    switch (anterior[k]) { // printar a sprite de acordo com o jogador
+                      case 'W': al_draw_bitmap_region(sprites,111,37*k,37,37,m,l,0);
+                      break;
+                      case 'A': al_draw_bitmap_region(sprites,0,37*k,37,37,m,l,0);
+                      break;
+                      case 'S': al_draw_bitmap_region(sprites,74,37*k,37,37,m,l,0);
+                      break;
+                      case 'D': al_draw_bitmap_region(sprites,37,37*k,37,37,m,l,0);
+                      break;
+                    }
                     verifica++;
-                }else if(inicio_aux_Bomba[k] == 1 && basica.jogadores[k].posbomba_x == i && basica.jogadores[k].posbomba_y == j){ //caso tenha uma bomba no mapa
+                }
+                else if(inicio_aux_Bomba[k] == 1 && basica.jogadores[k].posbomba_x == i && basica.jogadores[k].posbomba_y == j){ //caso tenha uma bomba no mapa
                     printf("b"); //printa a bomba(mas o jogador vai em cima,caso esteja no mesmo bloco,por hora)
+                    if (tmp_bomb) {
+                      al_draw_bitmap(explosion, m-37, l-37, 0); // if para a explosao
+                    }
+                    else {
+                      if ((i + j) % 2 == 0) {
+                        al_draw_bitmap_region(bomb,0,0,37,37,m,l,0);
+                      }
+                      else {
+                        al_draw_bitmap_region(bomb,37,0,37,37,m,l,0);
+                      }
+                      //al_draw_bitmap(bomb, m, l, 0);
+                    }
                     verifica++;
                 }
             }
             if(verifica==0){ //se ele n printou ngm,ele printa a matriz
-                if(matriz[i][j] == 1 || matriz[i][j] == 2)
-                    printf("0");
-                else if(matriz[i][j] == quebra)
-                    printf("Q");
-                else
-                    printf("N");
+                if(matriz[i][j] == 1 ) {
+                  printf("0");
+                  al_draw_bitmap(verde_1, m, l, 0);
+                }else if(matriz[i][j] == 2){
+                  printf("0");
+                  al_draw_bitmap(verde_2, m, l, 0);
+                }else if(matriz[i][j] == quebra){
+                  printf("Q");
+                  al_draw_bitmap(quebr, m, l, 0);
+                }
+                else{
+                  printf("N");
+                  al_draw_bitmap(pedr, m, l, 0);
+                }
             }
         }printf("\n");
+    }
+    al_flip_display();
+    if (tmp_bomb) { // delay qdo a variavel da bomba for um para manter a explosao por mais tempo
+      al_rest(0.15); // tempo bem curto pra tentar manter a jogabilidade
+      tmp_bomb = 0;
     }
 }
 
@@ -404,9 +531,15 @@ void contador_Bombas(int inicio_aux_Bomba[],time_t inicio_Bomba[],time_t atual_B
                         matou = 0;
                         sendMsgToServer(&minha_intencao,sizeof(msg_do_cliente));
                         printf("Voce perdeu!\n");
+                        al_draw_bitmap(background, 0, 0, 0);
+                        al_draw_text(fonte, al_map_rgb(255, 255, 255), Ltela / 2, 250, ALLEGRO_ALIGN_CENTRE, "Voce PERDEU!!!");
+                        al_flip_display();
+                        al_rest(5.0);
                     }
                     inicio_aux_Bomba[i] = 0; //prepara para receber outra bomba
+                    //tmp_bomb = 1;
                     printf("BOOM\n");
+                    printa_matriz(inicio_aux_Bomba);
                }
           }
      }
@@ -438,30 +571,201 @@ char controla_raio_explosao(char matou,int inicio_aux_Bomba[]){ //
 
           if(matriz[basica.jogadores[k].posbomba_x+1][basica.jogadores[k].posbomba_y] == quebra){
 
-              matriz[basica.jogadores[k].posbomba_x+1][basica.jogadores[k].posbomba_y] = verd_1;
+              matriz[basica.jogadores[k].posbomba_x+1][basica.jogadores[k].posbomba_y] = ((basica.jogadores[k].posbomba_x) + basica.jogadores[k].posbomba_y) % 2 == 0? verd_2 : verd_1;
               verificou = 1;
 
           }
           if(matriz[basica.jogadores[k].posbomba_x-1][basica.jogadores[k].posbomba_y] == quebra){
 
-              matriz[basica.jogadores[k].posbomba_x-1][basica.jogadores[k].posbomba_y] = verd_1;
+              matriz[basica.jogadores[k].posbomba_x-1][basica.jogadores[k].posbomba_y] = ((basica.jogadores[k].posbomba_x) + basica.jogadores[k].posbomba_y) % 2 == 0? verd_2 : verd_1;
               verificou = 1;
 
           }
           if(matriz[basica.jogadores[k].posbomba_x][basica.jogadores[k].posbomba_y+1] == quebra){
 
-              matriz[basica.jogadores[k].posbomba_x][basica.jogadores[k].posbomba_y+1] = verd_1;
+              matriz[basica.jogadores[k].posbomba_x][basica.jogadores[k].posbomba_y+1] = ((basica.jogadores[k].posbomba_x) + basica.jogadores[k].posbomba_y) % 2 == 0? verd_2 : verd_1;
               verificou = 1;
 
           }
           if(matriz[basica.jogadores[k].posbomba_x][basica.jogadores[k].posbomba_y-1] == quebra){
 
-              matriz[basica.jogadores[k].posbomba_x][basica.jogadores[k].posbomba_y-1] = verd_1;
+              matriz[basica.jogadores[k].posbomba_x][basica.jogadores[k].posbomba_y-1] = ((basica.jogadores[k].posbomba_x) + basica.jogadores[k].posbomba_y) % 2 == 0? verd_2 : verd_1;
               verificou = 1;
 
           }
       }
-    if(verificou != 0)
-        printa_matriz(inicio_aux_Bomba);
+    if(verificou != 0) {
+      tmp_bomb = 1; // adiciona 1 a variavel para explosao
+      printa_matriz(inicio_aux_Bomba);
+    }
+    else {
+      tmp_bomb = 1;
+      printa_matriz(inicio_aux_Bomba);
+    }
     return matou; //retorna 0 - nao morreu ou 1 - morreu
+}
+
+bool inicializar () {
+  if (!al_init()) {
+      puts("Falha ao inicializar a Allegro.\n");
+      return false;
+  }
+  /* if (!al_install_audio()) {
+       fprintf(stderr, "Falha ao inicializar áudio.\n");
+       return false;
+   }
+
+   if (!al_init_acodec_addon()) {
+       fprintf(stderr, "Falha ao inicializar codecs de áudio.\n");
+       return false;
+   }
+
+   if (!al_reserve_samples(1)) {
+       fprintf(stderr, "Falha ao alocar canais de audio.\n");
+       return false;
+   }
+   sample = al_load_sample("teste2.ogg");
+   if (!sample) {
+       puts("Falha ao carregar sample.\n");
+       return false;
+  }*/
+
+  al_init_font_addon();
+  if (!al_init_ttf_addon()) {
+      puts("Falha ao inicializar add-on allegro_ttf.\n");
+      return false;
+  }
+  if (!al_init_image_addon()) {
+      puts("Falha ao inicializar add-on allegro_image.\n");
+      return false;
+  }
+  if (!al_install_keyboard()) {
+      puts("Falha ao inicializar o teclado.\n");
+      return false;
+  }
+  janela = al_create_display(Ltela, Atela);
+  if (!janela) {
+      puts("Falha ao criar janela.\n");
+      return false;
+  }
+  al_set_window_title(janela, "CINXPLODE");
+
+  fonte = al_load_font("comic.ttf", 48, 0);
+  if (!fonte) {
+      puts("Falha ao carregar \"fonte comic.ttf\".\n");
+      al_destroy_display(janela);
+      return false;
+  }
+  fila_eventos = al_create_event_queue();
+  if (!fila_eventos) {
+      puts("Falha ao criar fila de eventos.\n");
+      al_destroy_display(janela);
+      return false;
+  }
+  pedr = al_load_bitmap("pedr.bmp");
+  if (!pedr) {
+      puts("Falha ao carregar imagem pedra\n");
+      al_destroy_display(janela);
+      al_destroy_event_queue(fila_eventos);
+      return false;
+  }
+  marro = al_load_bitmap("marro.bmp");
+  if (!marro) {
+      puts("Falha ao carregar imagem marrom.\n");
+      al_destroy_display(janela);
+      al_destroy_event_queue(fila_eventos);
+      return false;
+  }
+  quebr = al_load_bitmap("quebr.bmp");
+  if (!quebr) {
+      puts("Falha ao carregar imagem quebra.\n");
+      al_destroy_display(janela);
+      al_destroy_event_queue(fila_eventos);
+      return false;
+  }
+  verde_1 = al_load_bitmap("verde_1.bmp");
+  if (!verde_1) {
+      puts("Falha ao carregar imagem verde_1.\n");
+      al_destroy_display(janela);
+      al_destroy_event_queue(fila_eventos);
+      return false;
+  }
+  verde_2 = al_load_bitmap("verde_2.bmp");
+  if (!verde_2) {
+      puts("Falha ao carregar imagem verde_2.\n");
+      al_destroy_display(janela);
+      al_destroy_event_queue(fila_eventos);
+      return false;
+  }
+  bomb = al_load_bitmap("bomb.png");
+  if (!bomb) {
+      puts("Falha ao carregar imagem bomb.\n");
+      al_destroy_display(janela);
+      al_destroy_event_queue(fila_eventos);
+      return false;
+  }
+  sprites = al_load_bitmap("sprites.png");
+  if (!sprites) {
+      puts("Falha ao carregar imagem do sprites.\n");
+      al_destroy_display(janela);
+      al_destroy_event_queue(fila_eventos);
+      return false;
+  }
+  explosion = al_load_bitmap("explosion.png");
+  if (!explosion) {
+      puts("Falha ao carregar imagem do explosion.\n");
+      al_destroy_display(janela);
+      al_destroy_event_queue(fila_eventos);
+      return false;
+  }
+  background = al_load_bitmap("background.png");
+  if (!background) {
+      puts("Falha ao carregar imagem do background.\n");
+      al_destroy_display(janela);
+      al_destroy_event_queue(fila_eventos);
+      return false;
+  }
+  al_register_event_source(fila_eventos, al_get_keyboard_event_source()); // registrar eventos do teclado
+  al_register_event_source(fila_eventos, al_get_display_event_source(janela)); // registrar eventos da janela
+  return true;
+}
+
+void destroy () {
+  al_destroy_font(fonte);
+  al_destroy_display(janela);
+  al_destroy_event_queue(fila_eventos);
+  //al_destroy_audio_stream(musica);
+}
+
+void atribui_pos_ant(){ //antiga_pos[x].id/pos_ant_x/y
+    antiga_pos[0].id = basica.jogadores[0].id;
+    antiga_pos[0].pos_ant_x = basica.jogadores[0].pos_x;
+    antiga_pos[0].pos_ant_y = basica.jogadores[0].pos_y;
+
+    antiga_pos[1].id = basica.jogadores[1].id;
+    antiga_pos[1].pos_ant_x = basica.jogadores[1].pos_x;
+    antiga_pos[1].pos_ant_y = basica.jogadores[1].pos_y;
+
+    antiga_pos[2].id = basica.jogadores[2].id;
+    antiga_pos[2].pos_ant_x = basica.jogadores[2].pos_x;
+    antiga_pos[2].pos_ant_y = basica.jogadores[2].pos_y;
+
+    antiga_pos[3].id = basica.jogadores[3].id;
+    antiga_pos[3].pos_ant_x = basica.jogadores[3].pos_x;
+    antiga_pos[3].pos_ant_y = basica.jogadores[3].pos_y;
+
+}
+
+void atrib_jog_ant () { // verificar a posicao anteior do jogador
+  int i;
+  for (i=0;i<4;i++) {
+      if (basica.jogadores[i].pos_x < antiga_pos[i].pos_ant_x)
+      anterior[i] = 'W';
+      if (basica.jogadores[i].pos_x > antiga_pos[i].pos_ant_x)
+      anterior[i] = 'S';
+      if (basica.jogadores[i].pos_y < antiga_pos[i].pos_ant_y)
+      anterior[i] = 'A';
+      if (basica.jogadores[i].pos_y > antiga_pos[i].pos_ant_y)
+      anterior[i] = 'D';
+    }
 }
